@@ -221,19 +221,11 @@ public class DelayTable {
 	
 	public int getMeetingMatrixDimension() {
 		return MATRIX_DIMENSION;
-	}
-        
-//        public EpidemicKnapsackRouter getOtherRouter(){
-//            return otherRouter;
-//        }
+	}        
 	
 	public Map<DTNHost, Double> getMeetingMap(int from) {
 		HashMap<DTNHost, Double> map = new HashMap<DTNHost, Double>();
-		//RapidRouter r = ((RapidRouter) host.getRouter());
-		//EpidemicKnapsackRouter r = ((EpidemicKnapsackRouter) host.getRouter());
-                
-//		EpidemicKnapsackRouter r = otherRouter.getOtherEpidemicKnapsackRouter(host);
-		//r.getOtherEpidemicKnapsackRouter(host);
+
 		for (int i = 0; i < MATRIX_DIMENSION; i++) {
 			MeetingEntry entry = getIndirectMeetingEntry(from, i);
 			if (entry != null) {
@@ -362,8 +354,8 @@ public class DelayTable {
 	private MeetingEntry createMeetingEntry(MeetingEntry ... entries) {
 		if ((entries == null) || (entries.length == 0)) return null;
 		double[] meetingTimes = new double[entries.length];
-		double[] meetingUpdates = new double[entries.length];;
-		int[] meetingWeights = new int[entries.length];;
+		double[] meetingUpdates = new double[entries.length];
+		int[] meetingWeights = new int[entries.length];
 		
 		for (int i = 0; i < entries.length; i++) {
 			meetingTimes[i] = entries[i].getAvgMeetingTime();

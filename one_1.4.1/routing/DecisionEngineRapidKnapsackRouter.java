@@ -79,7 +79,7 @@ import core.*;
  *
  * @author PJ Dillon, University of Pittsburgh
  */
-public class DecisionEngineRapidKnapsackRouter extends ActiveRouter {
+public class DecisionEngineRapidKnapsackRouter extends ActiveRouterForKnapsack {
 
     public static final String PUBSUB_NS = "DecisionEngineRapidKnapsackRouter";
     public static final String ENGINE_SETTING = "decisionEngine";
@@ -309,7 +309,7 @@ public class DecisionEngineRapidKnapsackRouter extends ActiveRouter {
         boolean isFirstDelivery = isFinalRecipient
                 && !isDeliveredMessage(aMessage);
 
-        if (outgoing != null && decider.shouldSaveReceivedMessage(aMessage, getHost(), from)) {
+        if (outgoing != null && decider.shouldSaveReceivedMessage(aMessage, getHost())) {
             // not the final recipient and app doesn't want to drop the message
             // -> put to buffer
             addToMessages(aMessage, false);

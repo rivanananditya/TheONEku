@@ -34,7 +34,7 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
     private double timestamp;
     private final UtilityAlgorithm ALGORITHM = UtilityAlgorithm.AVERAGE_DELAY;
     private static final double INFINITY = 99999;
-    
+    private static final String UTILITY = "utility";
     
     protected Map<DTNHost, Double> startTimestamps;
     protected Map<DTNHost, List<Duration>> connHistory;
@@ -64,23 +64,23 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
     }
 
     @Override
-    public void connectionUp(DTNHost thisHost, DTNHost peer) {
+    public void connectionUp(DTNHost thisHost, DTNHost otherHost) {
         timestamp = SimClock.getTime();
-        synchronizeDelayTables(peer);
-        synchronizeMeetingTimes(peer);
-        updateDelayTableStat(thisHost, peer);
-        synchronizeAckedMessageIDs(peer);  
+        synchronizeDelayTables(otherHost);
+        synchronizeMeetingTimes(otherHost);
+        updateDelayTableStat(thisHost, otherHost);
+        synchronizeAckedMessageIDs(otherHost);  
         updateAckedMessageIds(thisHost);
-        this.delayTable.dummyUpdateConnection1(peer);
+        this.delayTable.dummyUpdateConnection1(otherHost);
     }
     
     @Override
-    public void doExchangeForNewConnection(Connection con, DTNHost peer) {
+    public void doExchangeForNewConnection(Connection con, DTNHost otherHost) {
         
     }
 
     @Override
-    public void connectionDown(Connection con, DTNHost thisHost, DTNHost peer) {
+    public void connectionDown(Connection con, DTNHost thisHost, DTNHost otherHost) {
         double times = SimClock.getTime() - timestamp;
         this.delayTable.updateConnection(con, times);           
     }
@@ -96,9 +96,9 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
     }
 
     @Override
-    public void updateDelayTableEntryNewMessage(Message m, DTNHost myHost) {
-        updateDelayTableEntry(m, myHost, estimateDelay(m, myHost, true), SimClock.getTime());
-        m.updateProperty("utility", estimateDelay(m, myHost, true));
+    public void updateDelayTableEntryNewMessage(Message m, DTNHost thisHost) {
+        updateDelayTableEntry(m, thisHost, estimateDelay(m, thisHost, true), SimClock.getTime());
+        m.updateProperty(UTILITY, estimateDelay(m, thisHost, true));
     }
 
     @Override
@@ -126,15 +126,12 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
     @Override
     public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost) {
         double utility = getMarginalUtility(m, otherHost, thisHost);
-        m.updateProperty("utility", utility);
+        m.updateProperty(UTILITY, utility);
 //        System.out.println("util "+utility);
         if (otherHost.getRouter().hasMessage(m.getId())) {
             return false;
         }
-        if (utility <= 0) {
-            return false;
-        }
-        return true;
+        return utility > 0;
     }
 
     @Override
@@ -160,10 +157,10 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
         return (testRapidDE) ((DecisionEngineRapidRouter) otherRouter).getDecisionEngine();
     }
 
-    private void synchronizeDelayTables(DTNHost peer) {
+    private void synchronizeDelayTables(DTNHost otherHost) {
 //        DTNHost otherHost = con.getOtherNode(getHost());
 //        RapidRouter otherRouter = (RapidRouter) otherHost.getRouter();
-        testRapidDE otherRouter = this.getOtherDecisionEngine(peer);
+        testRapidDE otherRouter = this.getOtherDecisionEngine(otherHost);
         DelayEntry delayEntry = null;
         DelayEntry otherDelayEntry = null;
 
@@ -180,48 +177,48 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
             //for all hosts check delay entries and create new if they doesn't exist
             //Entry<DTNHost host, Tuple<Double delay, Double lastUpdate>>
             for (Map.Entry<DTNHost, Tuple<Double, Double>> entry : delayEntry.getDelays()) {
-                DTNHost myHost = entry.getKey();
+                DTNHost thisHost = entry.getKey();
                 Double myDelay = entry.getValue().getKey();
                 Double myTime = entry.getValue().getValue();
 
                 //create a new host entry if host entry at other host doesn't exist
-                if ((otherDelayEntry == null) || (!otherDelayEntry.contains(myHost))) {
+                if ((otherDelayEntry == null) || (!otherDelayEntry.contains(thisHost))) {
                     //parameters: 
                     //m The message 
-                    //myHost The host which contains a copy of this message
+                    //thisHost The host which contains a copy of this message
                     //myDelay The estimated delay
                     //myTime The entry was last changed
-                    otherRouter.updateDelayTableEntry(m, myHost, myDelay, myTime);
+                    otherRouter.updateDelayTableEntry(m, thisHost, myDelay, myTime);
                 } else {
                     //check last update time of other hosts entry and update it 
-                    if (otherDelayEntry.isOlderThan(myHost, delayEntry.getLastUpdate(myHost))) {
+                    if (otherDelayEntry.isOlderThan(thisHost, delayEntry.getLastUpdate(thisHost))) {
                         //parameters: 
                         //m The message 
-                        //myHost The host which contains a copy of this message
+                        //thisHost The host which contains a copy of this message
                         //myDelay The estimated delay
                         //myTime The entry was last changed 
 
-                        otherRouter.updateDelayTableEntry(m, myHost, myDelay, myTime);
+                        otherRouter.updateDelayTableEntry(m, thisHost, myDelay, myTime);
                     }
 
-                    if ((otherDelayEntry.isAsOldAs(myHost, delayEntry.getLastUpdate(myHost))) && (delayEntry.getDelayOf(myHost) > otherDelayEntry.getDelayOf(myHost))) {
+                    if ((otherDelayEntry.isAsOldAs(thisHost, delayEntry.getLastUpdate(thisHost))) && (delayEntry.getDelayOf(thisHost) > otherDelayEntry.getDelayOf(thisHost))) {
                         //parameters: 
                         //m The message 
-                        //myHost The host which contains a copy of this message
+                        //thisHost The host which contains a copy of this message
                         //myDelay The estimated delay
                         //myTime The entry was last changed 
 
-                        otherRouter.updateDelayTableEntry(m, myHost, myDelay, myTime);
+                        otherRouter.updateDelayTableEntry(m, thisHost, myDelay, myTime);
                     }
                 }
             }
         }
     }
 
-    private void synchronizeMeetingTimes(DTNHost peer) {
+    private void synchronizeMeetingTimes(DTNHost otherHost) {
 //        DTNHost otherHost = con.getOtherNode(getHost());
 //        RapidRouter otherRouter = (RapidRouter) otherHost.getRouter();
-        testRapidDE otherRouter = this.getOtherDecisionEngine(peer);
+        testRapidDE otherRouter = this.getOtherDecisionEngine(otherHost);
         MeetingEntry meetingEntry = null;
         MeetingEntry otherMeetingEntry = null;
 
@@ -250,13 +247,13 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
         }
     }
 
-    private void updateDelayTableStat(DTNHost myHost, DTNHost peer) {
-//        DTNHost myHost = con.getOtherNode(peer);
+    private void updateDelayTableStat(DTNHost thisHost, DTNHost otherHost) {
+//        DTNHost thisHost = con.getOtherNode(otherHost);
 //        RapidRouter otherRouter = ((RapidRouter) otherHost.getRouter());
-        testRapidDE otherRouter = this.getOtherDecisionEngine(peer);
-        int from = peer.getAddress();
+        testRapidDE otherRouter = this.getOtherDecisionEngine(otherHost);
+        int from = otherHost.getAddress();
 
-        for (Message m : myHost.getMessageCollection()) {
+        for (Message m : thisHost.getMessageCollection()) {
             int to = m.getTo().getAddress();
             MeetingEntry entry = otherRouter.getDelayTable().getMeetingEntry(from, to);
             if (entry != null) {
@@ -269,10 +266,10 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
         return delayTable;
     }
 
-    private void synchronizeAckedMessageIDs(DTNHost peer) {
+    private void synchronizeAckedMessageIDs(DTNHost otherHost) {
 //        DTNHost otherHost = con.getOtherNode(getHost());
 //        RapidRouter otherRouter = (RapidRouter) otherHost.getRouter();
-        testRapidDE otherRouter = this.getOtherDecisionEngine(peer);
+        testRapidDE otherRouter = this.getOtherDecisionEngine(otherHost);
         this.delayTable.addAllAckedMessageIds(otherRouter.delayTable.getAllAckedMessageIds());
         otherRouter.delayTable.addAllAckedMessageIds(this.delayTable.getAllAckedMessageIds());
 
@@ -284,12 +281,12 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
      * and also delete the message entries of the ACKed messages in the delay
      * table
      */
-    private void deleteAckedMessages(DTNHost myHost) {
-//        DTNHost myHost = con.getOtherNode(peer);
+    private void deleteAckedMessages(DTNHost thisHost) {
+//        DTNHost thisHost = con.getOtherNode(otherHost);
         for (String id : this.delayTable.getAllAckedMessageIds()) {
-            if (myHost.getRouter().hasMessage(id)) {
+            if (thisHost.getRouter().hasMessage(id)) {
                 //delete messages from the message buffer
-                myHost.getRouter().deleteMessage(id, true);
+                thisHost.getRouter().deleteMessage(id, true);
             }
 
             //delete messages from the delay table
@@ -303,12 +300,12 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
      * Delete old message ids from the acked message id set which time to live
      * was passed
      */
-    private void updateAckedMessageIds(DTNHost myHost) {
-//        DTNHost myHost = con.getOtherNode(peer);
+    private void updateAckedMessageIds(DTNHost thisHost) {
+//        DTNHost thisHost = con.getOtherNode(otherHost);
         ArrayList<String> removableIds = new ArrayList<String>();
 
         for (String id : this.delayTable.getAllAckedMessageIds()) {
-            Message m = myHost.getRouter().getMessage(id);
+            Message m = thisHost.getRouter().getMessage(id);
             if ((m != null) && (m.getTtl() <= 0)) {
                 removableIds.add(id);
             }
@@ -573,8 +570,8 @@ public class testRapidDE implements RoutingDecisionEngineRapid {
      * @param host The host which contains a copy of this message
      * @return the current MU value
      */
-    private double getMarginalUtility(Message msg, DTNHost peer, DTNHost thisHost) {
-        final testRapidDE otherRouter = getOtherDecisionEngine(peer);
+    private double getMarginalUtility(Message msg, DTNHost otherHost, DTNHost thisHost) {
+        final testRapidDE otherRouter = getOtherDecisionEngine(otherHost);
 
         return getMarginalUtility(msg, otherRouter, thisHost);
     }

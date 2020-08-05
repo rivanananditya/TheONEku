@@ -75,7 +75,7 @@ public interface RoutingDecisionEngineRapidKnapsack
 	 * @return true if the message should be saved and further routed. 
 	 * False otherwise.
 	 */
-	public boolean shouldSaveReceivedMessage(Message m, DTNHost thisHost, DTNHost from);
+	public boolean shouldSaveReceivedMessage(Message m, DTNHost thisHost);
 	
 	/**
 	 * Called to determine if the given Message should be sent to the given host.

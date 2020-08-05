@@ -3,7 +3,8 @@
 #
 
 ## Scenario settings
-Scenario.name = scenario_TJ_fix_4_25M_Bus_3M_SensorL_64k_SensorM_256k_SizeL_1Hrs_M_5Hrs_L
+#Scenario.name = scenario_TJ_fix_4_25M_Bus_3M_SensorL_64k_SensorM_256k_SizeL_1Hrs_M_5Hrs_L
+Scenario.name = scenario-TJ-%%Group.router%%-AVERAGE_DELAY
 Scenario.simulateConnections = true
 # 43200s == 12h
 # 64800s == 18h
@@ -56,7 +57,11 @@ Scenario.nrofHostGroups = 64
 # Common settings for all groups
 Group.movementModel = MapRouteMovementWithStop
 
-Group.router = EpidemicRouter
+#Group.router = EpidemicRouter
+
+#RapidWithKnapsackRouter
+Group.router = DecisionEngineRapidKnapsackRouter
+DecisionEngineRapidKnapsackRouter.decisionEngine = RapidWithKnapsackRouter
 
 Group.bufferSize = 25M
 Group.waitTime = 0, 0
@@ -599,7 +604,7 @@ Report.nrofReports = 2
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
-Report.reportDir = reports/
+Report.reportDir = reports/BusTj/test/1/
 # Report classes to load
 #Report.report1 = MessageStatsReport
 Report.report1 = ReportBusPesanLalulintas

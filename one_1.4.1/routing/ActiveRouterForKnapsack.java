@@ -24,7 +24,7 @@ import java.util.LinkedList;
  * {@link #getOldestMessage(boolean)}) and watching of sending connections (see
  * {@link #update()}).
  */
-public abstract class ActiveRouter extends MessageRouter {
+public abstract class ActiveRouterForKnapsack extends MessageRouter {
 
     /**
      * Delete delivered messages -setting id ({@value}). Boolean valued. If set
@@ -63,7 +63,7 @@ public abstract class ActiveRouter extends MessageRouter {
      *
      * @param s The settings object
      */
-    public ActiveRouter(Settings s) {
+    public ActiveRouterForKnapsack(Settings s) {
         super(s);
 
         if (s.contains(DELETE_DELIVERED_S)) {
@@ -78,7 +78,7 @@ public abstract class ActiveRouter extends MessageRouter {
      *
      * @param r The router prototype where setting values are copied from
      */
-    protected ActiveRouter(ActiveRouter r) {
+    protected ActiveRouterForKnapsack(ActiveRouterForKnapsack r) {
         super(r);
         this.deleteDelivered = r.deleteDelivered;
     }
@@ -237,7 +237,10 @@ public abstract class ActiveRouter extends MessageRouter {
         }
 
         /* remove oldest messages but not the ones being sent */
-        if (!makeRoomForMessage(m.getSize())) {
+//        if (!makeRoomForMessage(m.getSize())) {
+//            return DENIED_NO_SPACE; // couldn't fit into buffer -> reject
+//        }
+        if (!makeRoomForMsgUseKnapsack(m.getSize())) {
             return DENIED_NO_SPACE; // couldn't fit into buffer -> reject
         }
 
@@ -284,16 +287,18 @@ public abstract class ActiveRouter extends MessageRouter {
             LinkedList<Message> m = knapsackDrop(size);
             if (m != null) {
                 for (int i = 0; i < m.size(); i++) {
-                    if(isSending(m.get(i).getId())){
+                    if (isSending(m.get(i).getId())) {
                         continue;
                     }
+                    System.out.println("pesan di drop "+m.get(i).getId());
                     deleteMessage(m.get(i).getId(), true);
                 }
+            } else {
+                return false;
             }
         }
         return true;
     }
-    
 
     public LinkedList<Message> knapsackDrop(int size) {
         LinkedList<Message> msg = new LinkedList<>(this.getMessageCollection());
@@ -302,7 +307,7 @@ public abstract class ActiveRouter extends MessageRouter {
         int jumlahMsg = msg.size();
         int i, length;
         int restriction = (this.getBufferSize() - this.getFreeBufferSize()) - size;
-        LinkedList<Message> getLowestMsg = null;
+        LinkedList<Message> getLowestMsg = new LinkedList<>();
         double bestSolution[][] = new double[jumlahMsg + 1][restriction + 1];
 
         for (i = 0; i <= jumlahMsg; i++) {
@@ -319,10 +324,13 @@ public abstract class ActiveRouter extends MessageRouter {
         }
 
         for (int j = jumlahMsg; j >= 1; j--) {
-            if (bestSolution[j][restriction] > bestSolution[j - 1][restriction]) {
-                restriction = restriction - lengthMsg[j - 1];
-            } else {
+            
+            if (bestSolution[j][restriction] <= bestSolution[j - 1][restriction]) {
                 getLowestMsg.add(msg.get(j - 1));
+                restriction = restriction - lengthMsg[j - 1];
+            } 
+            if(restriction == 499999){
+                break;
             }
         }
         return getLowestMsg;
@@ -372,7 +380,8 @@ public abstract class ActiveRouter extends MessageRouter {
      * @param size Size of the new message
      */
     protected void makeRoomForNewMessage(int size) {
-        makeRoomForMessage(size);
+//        makeRoomForMessage(size);
+        makeRoomForMsgUseKnapsack(size);
     }
 
     /**
@@ -669,7 +678,8 @@ public abstract class ActiveRouter extends MessageRouter {
             if (removeCurrent) {
                 // if the message being sent was holding excess buffer, free it
                 if (this.getFreeBufferSize() < 0) {
-                    this.makeRoomForMessage(0);
+//                    this.makeRoomForMessage(0);
+                    this.makeRoomForMsgUseKnapsack(0);
                 }
                 sendingConnections.remove(i);
             } else {
