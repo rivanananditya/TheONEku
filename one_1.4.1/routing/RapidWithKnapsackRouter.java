@@ -29,7 +29,7 @@ import routing.rapid.MeetingEntry;
  * @author jarkom
  */
 public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsack {
-    
+
     private DelayTable delayTable;
     private double timestamp;
     private final UtilityAlgorithm ALGORITHM = UtilityAlgorithm.AVERAGE_DELAY;
@@ -42,7 +42,9 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
     LinkedList<Integer> listSend01;
     LinkedList<Integer> lengthMsg;
     LinkedList<Double> utilityMsg;
-    
+    LinkedList<Message> tempMsg;
+    private double[][] bestSolution;
+
     public RapidWithKnapsackRouter(Settings s) {
         super();
         delayTable = null;
@@ -51,14 +53,16 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         listSend01 = null;
         startTimestamps = null;
         connHistory = null;
+        tempMsg=null;
+        bestSolution=null;
     }
-    
+
     @Override
     public void initi(DTNHost host, List<MessageListener> mListeners) {
         delayTable = new DelayTable(host);
 //        System.out.println(host);
     }
-    
+
     public RapidWithKnapsackRouter(RapidWithKnapsackRouter r) {
         super();
         delayTable = r.delayTable;
@@ -69,14 +73,16 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         listSend01 = new LinkedList<Integer>();
         lengthMsg = new LinkedList<>();
         utilityMsg = new LinkedList<>();
+        tempMsg = new LinkedList<>();
+        bestSolution = r.bestSolution;
     }
-    
+
     private enum UtilityAlgorithm {
         AVERAGE_DELAY,
         MISSED_DEADLINES,
         MAXIMUM_DELAY;
     }
-    
+
     @Override
     public void connectionUp(DTNHost thisHost, DTNHost otherHost) {
 //        System.out.println(thisHost+" con "+otherHost);
@@ -91,23 +97,25 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
 //        synchronizeAckedMessageIDs(otherHost);
 //        updateAckedMessageIds(thisHost);
         this.delayTable.dummyUpdateConnection1(otherHost);
+//        this.getSizeMsgToArrInBytes(thisHost);
         
         if (this.getSyaratKnapsack(thisHost, otherHost)) {
+            this.getUtilityMsgToArr(thisHost, otherHost);
             knapsackSend(thisHost, otherHost);
         }
     }
-    
+
     @Override
     public void doExchangeForNewConnection(Connection con, DTNHost otherHost) {
-        
+
     }
-    
+
     @Override
     public void connectionDown(Connection con, DTNHost thisHost, DTNHost otherHost) {
         //rapid
         double times = SimClock.getTime() - this.timestamp;
         this.delayTable.updateConnection(con, times);
-        
+
         double time = 0;
         if (this.startTimestamps.containsKey(otherHost)) {
             time = this.startTimestamps.get(otherHost);
@@ -126,7 +134,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         if (etime - time > 0) {
             history.add(new Duration(time, etime));
         }
-        
+
         this.connHistory.put(otherHost, history);
         this.startTimestamps.remove(otherHost);
 
@@ -134,25 +142,27 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         this.listSend01.clear();
         this.lengthMsg.clear();
         this.utilityMsg.clear();
+        this.tempMsg.clear();
+        bestSolution=null;
     }
-    
+
     @Override
     public void deletedAckMsgInDelayTable(DTNHost thisHost) {
 //        deleteAckedMessages(thisHost);
     }
-    
+
     @Override
     public boolean newMessage(Message m) {
         return true;
     }
-    
+
     @Override
     public void updateDelayTableEntryNewMessage(Message m, DTNHost thisHost) {
         updateDelayTableEntry(m, thisHost, estimateDelay(m, thisHost, true), SimClock.getTime());
         m.updateProperty(knapsackSend, 0);
         m.updateProperty(UTILITY, estimateDelay(m, thisHost, true));
     }
-    
+
     @Override
     public boolean isFinalDest(Message m, DTNHost aHost) {
         if (m.getTo() == aHost) {
@@ -161,12 +171,17 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         }
         return false;
     }
-    
+
     @Override
     public boolean shouldSaveReceivedMessage(Message m, DTNHost thisHost) {
-        return m.getTo() != thisHost;
+        if(thisHost.getRouter().hasMessage(m.getId())){
+            return false;
+        }
+        else{
+            return m.getTo() != thisHost;
+        }
     }
-    
+
     @Override
     public void updateDelayTableReceiveMsg(Message m, DTNHost from, DTNHost thisHost) {
         double time = SimClock.getTime();
@@ -174,7 +189,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         updateDelayTableEntry(m, thisHost, delay, time);
         this.getOtherDecisionEngine(from).updateDelayTableEntry(m, thisHost, delay, time);
     }
-    
+
     @Override
     public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost) {
         if (this.getSyaratKnapsack(thisHost, otherHost)) {
@@ -185,36 +200,36 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             return utility > 0;
         }
     }
-    
+
     public boolean getSyaratKnapsack(DTNHost thisHost, DTNHost otherHost) {
         int retriction = this.getRetrictionForSend(thisHost, otherHost);
         int isiBuffer = thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize();
         return isiBuffer > retriction;
     }
-    
+
     @Override
     public boolean shouldDeleteSentMessage(Message m, DTNHost otherHost) {
         return false;
     }
-    
+
     @Override
     public boolean shouldDeleteOldMessage(Message m, DTNHost hostReportingOld) {
         return false;
     }
-    
+
     @Override
     public RoutingDecisionEngineRapidKnapsack replicate() {
         return new RapidWithKnapsackRouter(this);
     }
-    
+
     private RapidWithKnapsackRouter getOtherDecisionEngine(DTNHost h) {
         MessageRouter otherRouter = h.getRouter();
         assert otherRouter instanceof DecisionEngineRapidKnapsackRouter : "This router only works "
                 + " with other routers of same type";
-        
+
         return (RapidWithKnapsackRouter) ((DecisionEngineRapidKnapsackRouter) otherRouter).getDecisionEngine();
     }
-    
+
     private void synchronizeDelayTables(DTNHost otherHost) {
 //        DTNHost otherHost = con.getOtherNode(getHost());
 //        RapidRouter otherRouter = (RapidRouter) otherHost.getRouter();
@@ -228,7 +243,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             delayEntry = this.delayTable.getDelayEntryByMessageId(m.getId());
             assert (delayEntry != null);
             otherDelayEntry = otherRouter.delayTable.getDelayEntryByMessageId(m.getId());
-            
+
             if (delayEntry.getDelays() == null) {
                 continue;
             }
@@ -258,7 +273,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
 
                         otherRouter.updateDelayTableEntry(m, thisHost, myDelay, myTime);
                     }
-                    
+
                     if ((otherDelayEntry.isAsOldAs(thisHost, delayEntry.getLastUpdate(thisHost))) && (delayEntry.getDelayOf(thisHost) > otherDelayEntry.getDelayOf(thisHost))) {
                         //parameters: 
                         //m The message 
@@ -272,7 +287,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             }
         }
     }
-    
+
     private void synchronizeMeetingTimes(DTNHost otherHost) {
 //        DTNHost otherHost = con.getOtherNode(getHost());
 //        RapidRouter otherRouter = (RapidRouter) otherHost.getRouter();
@@ -284,7 +299,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         for (int i = 0; i < this.delayTable.getMeetingMatrixDimension(); i++) {
             for (int k = 0; k < this.delayTable.getMeetingMatrixDimension(); k++) {
                 meetingEntry = this.delayTable.getMeetingEntry(i, k);
-                
+
                 if (meetingEntry != null) {
                     otherMeetingEntry = otherRouter.delayTable.getMeetingEntry(i, k);
                     //create a new meeting entry if meeting entry at other host doesn't exist
@@ -295,7 +310,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
                         if (otherMeetingEntry.isOlderThan(meetingEntry.getLastUpdate())) {
                             otherRouter.delayTable.setAvgMeetingTime(i, k, meetingEntry.getAvgMeetingTime(), meetingEntry.getLastUpdate(), meetingEntry.getWeight());
                         }
-                        
+
                         if ((otherMeetingEntry.isAsOldAs(meetingEntry.getLastUpdate())) && (meetingEntry.getAvgMeetingTime() > otherMeetingEntry.getAvgMeetingTime())) {
                             otherRouter.delayTable.setAvgMeetingTime(i, k, meetingEntry.getAvgMeetingTime(), meetingEntry.getLastUpdate(), meetingEntry.getWeight());
                         }
@@ -304,13 +319,13 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             }
         }
     }
-    
+
     private void updateDelayTableStat(DTNHost thisHost, DTNHost otherHost) {
 //        DTNHost thisHost = con.getOtherNode(otherHost);
 //        RapidRouter otherRouter = ((RapidRouter) otherHost.getRouter());
         RapidWithKnapsackRouter otherRouter = this.getOtherDecisionEngine(otherHost);
         int from = otherHost.getAddress();
-        
+
         for (Message m : thisHost.getMessageCollection()) {
             int to = m.getTo().getAddress();
             MeetingEntry entry = otherRouter.getDelayTable().getMeetingEntry(from, to);
@@ -319,18 +334,18 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             }
         }
     }
-    
+
     public DelayTable getDelayTable() {
         return delayTable;
     }
-    
+
     private void synchronizeAckedMessageIDs(DTNHost otherHost) {
 //        DTNHost otherHost = con.getOtherNode(getHost());
 //        RapidRouter otherRouter = (RapidRouter) otherHost.getRouter();
         RapidWithKnapsackRouter otherRouter = this.getOtherDecisionEngine(otherHost);
         this.delayTable.addAllAckedMessageIds(otherRouter.delayTable.getAllAckedMessageIds());
         otherRouter.delayTable.addAllAckedMessageIds(this.delayTable.getAllAckedMessageIds());
-        
+
         assert (this.delayTable.getAllAckedMessageIds().equals(otherRouter.delayTable.getAllAckedMessageIds()));
     }
 
@@ -361,14 +376,14 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
     private void updateAckedMessageIds(DTNHost thisHost) {
 //        DTNHost thisHost = con.getOtherNode(otherHost);
         ArrayList<String> removableIds = new ArrayList<String>();
-        
+
         for (String id : this.delayTable.getAllAckedMessageIds()) {
             Message m = thisHost.getRouter().getMessage(id);
             if ((m != null) && (m.getTtl() <= 0)) {
                 removableIds.add(id);
             }
         }
-        
+
         if (removableIds.size() > 0) {
             this.delayTable.removeAllAckedMessageIds(removableIds);
         }
@@ -384,13 +399,13 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
      */
     public void updateDelayTableEntry(Message m, DTNHost thisHost, double delay, double time) {
         DelayEntry delayEntry;
-        
+
         if ((delayEntry = this.delayTable.getDelayEntryByMessageId(m.getId())) == null) {
             delayEntry = new DelayEntry(m);
             this.delayTable.addEntry(delayEntry);
         }
         assert ((delayEntry != null) && (this.delayTable.getDelayEntryByMessageId(m.getId()) != null));
-        
+
         if (delayEntry.contains(thisHost)) {
             delayEntry.setHostDelay(thisHost, delay, time);
         } else {
@@ -438,10 +453,10 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         } else {
             packetDelay = this.delayTable.getDelayEntryByMessageId(msg.getId()).getDelayOf(thisHost);
         }
-        
+
         return packetDelay;
     }
-    
+
     private double computeRemainingTime(Message msg, DTNHost thisHost) {
         double transferTime = INFINITY;		//MX(i):random variable for corresponding transfer time delay
         double remainingTime = 0.0;		//a(i): random variable that determines the	remaining time to deliver message i
@@ -461,7 +476,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
 //        System.out.println(remainingTime);
         return remainingTime;
     }
-    
+
     private double computeTransferTime(Message msg, DTNHost hostDest, DTNHost thisHost) {
         Collection<Message> msgCollection = thisHost.getMessageCollection();
 //		List<Tuple<Message, Double>> list=new ArrayList<Tuple<Message,Double>>();
@@ -504,7 +519,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
 //        System.out.println(transferTime);
         return transferTime;
     }
-    
+
     private double computePacketDelay(Message msg, double remainingTime) {
         double timeSinceCreation = 0.0;					//T(i): time since creation of message i 
         double expectedRemainingTime = 0.0;				//A(i): expected remaining time E[a(i)]=A(i)
@@ -516,10 +531,10 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         // compute packet delay
         timeSinceCreation = SimClock.getTime() - msg.getCreationTime();
         packetDelay = timeSinceCreation + expectedRemainingTime;
-        
+
         return packetDelay;
     }
-    
+
     private double computeUtility(Message msg, DTNHost thisHost, boolean recompute) {
         double utility = 0.0;		// U(i): The utility of the message (packet) i
         double packetDelay = 0.0;	// D(i): The expected delay of message i
@@ -583,7 +598,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             }
             default:
         }
-        
+
         return utility;
     }
 
@@ -600,7 +615,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         double marginalUtility = 0.0;
         double utility = 0.0;			// U(i): The utility of the message (packet) i
         double utilityOld = 0.0;
-        
+
         assert (this != router);
         utility = router.computeUtility(msg, thisHost, true);
         utilityOld = this.computeUtility(msg, thisHost, true);
@@ -616,7 +631,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         } else {
             marginalUtility = (utility - utilityOld) / msg.getSize();
         }
-        
+
         return marginalUtility;
     }
 
@@ -631,10 +646,10 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
      */
     private double getMarginalUtility(Message msg, DTNHost otherHost, DTNHost thisHost) {
         final RapidWithKnapsackRouter otherRouter = getOtherDecisionEngine(otherHost);
-        
+
         return getMarginalUtility(msg, otherRouter, thisHost);
     }
-    
+
     public double getAvgDurations(DTNHost nodes) {
         List<Duration> list = getListDuration(nodes);
         Iterator<Duration> duration = list.iterator();
@@ -649,7 +664,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         }
         return avgDuration;
     }
-    
+
     public List<Duration> getListDuration(DTNHost nodes) {
         if (this.connHistory.containsKey(nodes)) {
             return this.connHistory.get(nodes);
@@ -658,57 +673,56 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
             return d;
         }
     }
-    
+
     public int getTransferSpeed(DTNHost thisHost) {
         return thisHost.getInterfaces().get(0).getTransmitSpeed();
     }
-    
-    public void knapsackSend(DTNHost thisHost, DTNHost otherHost) {
-        Collection<Message> msgCollection = thisHost.getMessageCollection();
-        LinkedList<Message> msg = new LinkedList<>(msgCollection);
-        int jumlahMsg = msg.size();
-        int i, length;
 
-//        int[] lengthMsg = getSizeMsgToArrInBytes(thisHost);
-//        double[] utilityMsg = getUtilityMsgToArr(thisHost, otherHost);
-        int retriction = this.getRetrictionForSend(thisHost, otherHost);
-        
-        double bestSolution[][] = new double[jumlahMsg + 1][retriction + 1];
-        
-        for (i = 0; i <= jumlahMsg; i++) {
-            for (length = 62499; length <= retriction; length++) {
-                if (i == 0 || length == 62499) {
+    public void knapsackSend(DTNHost thisHost, DTNHost otherHost) {
+        tempMsg.addAll(thisHost.getMessageCollection());
+        int jumlahMsg = 0;
+        int retriction = 0;
+        jumlahMsg = tempMsg.size();       
+        retriction = this.getRetrictionForSend(thisHost, otherHost);
+
+        bestSolution = new double [jumlahMsg + 1][retriction + 1];
+        //124
+        //62499
+        for (int i = 0; i <= jumlahMsg; i++) {
+            for (int length = 124; length <= retriction; length++) {
+                if (i == 0 || length == 124) {
                     bestSolution[i][length] = 0;
-                } else if (lengthMsg.get(i) <= length) {
+                } else if (lengthMsg.get(i - 1) <= length) {
                     bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
-                            utilityMsg.get(i) + bestSolution[i - 1][length - lengthMsg.get(i)]);
+                            utilityMsg.get(i - 1) + bestSolution[i - 1][length - lengthMsg.get(i - 1)]);
                 } else {
                     bestSolution[i][length] = bestSolution[i - 1][length];
                 }
             }
         }
-        
+        int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
-            if (bestSolution[j][retriction] > bestSolution[j - 1][retriction]) {
-//                listSend.add(msg.get(j - 1));
-                listSend01.addFirst(1);
-                msg.get(j - 1).updateProperty(knapsackSend, 1);
-                retriction = retriction - lengthMsg.get(i);
+            if (bestSolution[j][temp] > bestSolution[j - 1][temp]) {
+//                msg.get(j - 1).updateProperty(knapsackSend, 1);
+                tempMsg.get(j - 1).updateProperty(knapsackSend, 1);
+                listSend01.addFirst((Integer) tempMsg.get(j-1).getProperty(knapsackSend));
+                temp = temp - lengthMsg.get(j - 1);
             } else {
-                msg.get(j - 1).updateProperty(knapsackSend, 0);
-                listSend01.addFirst(0);
+//                msg.get(j - 1).updateProperty(knapsackSend, 0);
+                tempMsg.get(j - 1).updateProperty(knapsackSend, 0);
+                listSend01.addFirst((Integer) tempMsg.get(j-1).getProperty(knapsackSend));
             }
         }
-        System.out.println(listSend01);
+//        System.out.println(listSend01);
     }
-    
+
     public int getRetrictionForSend(DTNHost thisHost, DTNHost otherHost) {
         int retriction;
         int avgDuration = (int) this.getAvgDurations(otherHost);
-        
+
         int tfSpeed = this.getTransferSpeed(thisHost);
         retriction = Math.abs(avgDuration * tfSpeed);
-        
+
         return retriction;
     }
 
@@ -722,14 +736,14 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
 //        }
 //        return lengthMsg;
 //    }
-    public void getSizeMsgToArrInBytes(DTNHost thisHost) {
-        Collection<Message> msgCollection = thisHost.getMessageCollection();
-        lengthMsg = new LinkedList<>();
-        for (Message m : msgCollection) {
-            lengthMsg.add(m.getSize() / 8); //in Bytes
-            System.out.println(lengthMsg);
-        }        
-    }
+//    public void getSizeMsgToArrInBytes(DTNHost thisHost) {
+//        Collection<Message> msgCollection = thisHost.getMessageCollection();
+//        lengthMsg = new LinkedList<>();
+//        for (Message m : msgCollection) {
+//            lengthMsg.add(m.getSize() / 8); //in Bytes        
+//        }
+//        System.out.println(lengthMsg);
+//    }
 
 //    public double[] getUtilityMsgToArr(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
@@ -744,10 +758,12 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
 //    }
     public void getUtilityMsgToArr(DTNHost thisHost, DTNHost otherHost) {
         Collection<Message> msgCollection = thisHost.getMessageCollection();
-        for (Message m : msgCollection) {            
+        for (Message m : msgCollection) {
+            lengthMsg.add(m.getSize() / 8); //in Bytes 
             m.updateProperty(UTILITY, getMarginalUtility(m, otherHost, thisHost));
             utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
-            System.out.println(utilityMsg);
         }
+//        System.out.println(utilityMsg);
+//        System.out.println(lengthMsg);
     }
 }

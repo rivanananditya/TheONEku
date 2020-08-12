@@ -56,6 +56,10 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
     private double lastTtlCheck;
 
     private static final String UTILITY = "utility";
+    LinkedList<Integer> lengthMsg;
+    LinkedList<Double> utilityMsg;
+    LinkedList<Message> getLowestUtilMsg;
+    LinkedList<Message> tempMsg;
 
     /**
      * Constructor. Creates a new message router based on the settings in the
@@ -81,6 +85,11 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
     protected ActiveRouterForKnapsack(ActiveRouterForKnapsack r) {
         super(r);
         this.deleteDelivered = r.deleteDelivered;
+
+        lengthMsg = new LinkedList<>();
+        utilityMsg = new LinkedList<>();
+        getLowestUtilMsg = new LinkedList<>();
+        tempMsg = new LinkedList<>();
     }
 
     @Override
@@ -290,9 +299,12 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
                     if (isSending(m.get(i).getId())) {
                         continue;
                     }
-                    System.out.println("pesan di drop "+m.get(i).getId());
+//                    System.out.println("pesan di drop "+m.get(i).getId());
                     deleteMessage(m.get(i).getId(), true);
                 }
+                
+                getLowestUtilMsg.clear();
+//                System.out.println(getLowestUtilMsg);
             } else {
                 return false;
             }
@@ -301,22 +313,23 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
     }
 
     public LinkedList<Message> knapsackDrop(int size) {
-        LinkedList<Message> msg = new LinkedList<>(this.getMessageCollection());
-        double[] utilityMsg = getUtilityMsgToArr();
-        int[] lengthMsg = getSizeMsgToArr();
-        int jumlahMsg = msg.size();
-        int i, length;
-        int restriction = (this.getBufferSize() - this.getFreeBufferSize()) - size;
-        LinkedList<Message> getLowestMsg = new LinkedList<>();
-        double bestSolution[][] = new double[jumlahMsg + 1][restriction + 1];
-
-        for (i = 0; i <= jumlahMsg; i++) {
-            for (length = 499999; length <= restriction; length++) {
-                if (i == 0 || length == 499999) {
+        getUtilSizeMsg();
+        tempMsg.addAll(this.getMessageCollection());
+        int jumlahMsg = 0;
+        int restriction = 0;
+        jumlahMsg = tempMsg.size();
+        restriction = (this.getBufferSize() - this.getFreeBufferSize()) - size;
+        double bestSolution[][] = null;
+        bestSolution = new double[jumlahMsg + 1][restriction + 1];
+        //999
+        //499999
+        for (int i = 0; i <= jumlahMsg; i++) {
+            for (int length = 999; length <= restriction; length++) {
+                if (i == 0 || length == 999) {
                     bestSolution[i][length] = 0;
-                } else if (lengthMsg[i - 1] <= length) {
+                } else if (lengthMsg.get(i - 1) <= length) {
                     bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
-                            utilityMsg[i - 1] + bestSolution[i - 1][length - lengthMsg[i - 1]]);
+                            utilityMsg.get(i - 1) + bestSolution[i - 1][length - lengthMsg.get(i - 1)]);
                 } else {
                     bestSolution[i][length] = bestSolution[i - 1][length];
                 }
@@ -324,38 +337,23 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
         }
 
         for (int j = jumlahMsg; j >= 1; j--) {
-            
-            if (bestSolution[j][restriction] <= bestSolution[j - 1][restriction]) {
-                getLowestMsg.add(msg.get(j - 1));
-                restriction = restriction - lengthMsg[j - 1];
-            } 
-            if(restriction == 499999){
-                break;
+            if (bestSolution[j][restriction] > bestSolution[j - 1][restriction]) {
+                restriction = restriction - lengthMsg.get(j - 1);
+            } else {
+                getLowestUtilMsg.add(tempMsg.get(j - 1));
             }
         }
-        return getLowestMsg;
+        this.tempMsg.clear();
+        this.lengthMsg.clear();
+        this.utilityMsg.clear();
+        return getLowestUtilMsg;
     }
 
-    public double[] getUtilityMsgToArr() {
-        Collection<Message> msgCollection = this.getMessageCollection();
-        LinkedList<Message> msg = new LinkedList<>(msgCollection);
-        double[] utilityMsg = new double[msg.size()];
-        for (int i = 0; i < msg.size(); i++) {
-            utilityMsg[i] = (double) msg.get(i).getProperty(UTILITY);
-//            System.out.println(utilityMsg[i]);
+    public void getUtilSizeMsg() {
+        for (Message m : this.getMessageCollection()) {
+            lengthMsg.add(m.getSize());
+            utilityMsg.add((Double) m.getProperty(UTILITY));
         }
-        return utilityMsg;
-    }
-
-    public int[] getSizeMsgToArr() {
-        Collection<Message> msgCollection = this.getMessageCollection();
-        LinkedList<Message> msg = new LinkedList<>(msgCollection);
-        int[] lengthMsg = new int[msg.size()];
-        for (int i = 0; i < msg.size(); i++) {
-            lengthMsg[i] = msg.get(i).getSize();
-//            System.out.println(lengthMsg[i]);
-        }
-        return lengthMsg;
     }
 
     /**
