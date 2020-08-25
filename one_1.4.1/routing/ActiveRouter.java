@@ -273,84 +273,8 @@ public abstract class ActiveRouter extends MessageRouter {
 
         return true;
     }
-
-    protected boolean makeRoomForMsgUseKnapsack(int size) {
-        if (size > this.getBufferSize()) {
-            return false; // message too big for the buffer
-        }
-
-        int freeBuffer = this.getFreeBufferSize();
-        if (freeBuffer < size) {
-            LinkedList<Message> m = knapsackDrop(size);
-            if (m != null) {
-                for (int i = 0; i < m.size(); i++) {
-                    if(isSending(m.get(i).getId())){
-                        continue;
-                    }
-                    deleteMessage(m.get(i).getId(), true);
-                }
-            }
-        }
-        return true;
-    }
     
-
-    public LinkedList<Message> knapsackDrop(int size) {
-        LinkedList<Message> msg = new LinkedList<>(this.getMessageCollection());
-        double[] utilityMsg = getUtilityMsgToArr();
-        int[] lengthMsg = getSizeMsgToArr();
-        int jumlahMsg = msg.size();
-        int i, length;
-        int restriction = (this.getBufferSize() - this.getFreeBufferSize()) - size;
-        LinkedList<Message> getLowestMsg = null;
-        double bestSolution[][] = new double[jumlahMsg + 1][restriction + 1];
-
-        for (i = 0; i <= jumlahMsg; i++) {
-            for (length = 499999; length <= restriction; length++) {
-                if (i == 0 || length == 499999) {
-                    bestSolution[i][length] = 0;
-                } else if (lengthMsg[i - 1] <= length) {
-                    bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
-                            utilityMsg[i - 1] + bestSolution[i - 1][length - lengthMsg[i - 1]]);
-                } else {
-                    bestSolution[i][length] = bestSolution[i - 1][length];
-                }
-            }
-        }
-
-        for (int j = jumlahMsg; j >= 1; j--) {
-            if (bestSolution[j][restriction] > bestSolution[j - 1][restriction]) {
-                restriction = restriction - lengthMsg[j - 1];
-            } else {
-                getLowestMsg.add(msg.get(j - 1));
-            }
-        }
-        return getLowestMsg;
-    }
-
-    public double[] getUtilityMsgToArr() {
-        Collection<Message> msgCollection = this.getMessageCollection();
-        LinkedList<Message> msg = new LinkedList<>(msgCollection);
-        double[] utilityMsg = new double[msg.size()];
-        for (int i = 0; i < msg.size(); i++) {
-            utilityMsg[i] = (double) msg.get(i).getProperty(UTILITY);
-//            System.out.println(utilityMsg[i]);
-        }
-        return utilityMsg;
-    }
-
-    public int[] getSizeMsgToArr() {
-        Collection<Message> msgCollection = this.getMessageCollection();
-        LinkedList<Message> msg = new LinkedList<>(msgCollection);
-        int[] lengthMsg = new int[msg.size()];
-        for (int i = 0; i < msg.size(); i++) {
-            lengthMsg[i] = msg.get(i).getSize();
-//            System.out.println(lengthMsg[i]);
-        }
-        return lengthMsg;
-    }
-
-    /**
+   /**
      * Drops messages whose TTL is less than zero.
      */
     protected void dropExpiredMessages() {

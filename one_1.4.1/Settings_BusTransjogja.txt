@@ -5,8 +5,10 @@
 ## Scenario settings
 #Scenario.name = scenario_TJ_fix_4_25M_Bus_3M_SensorL_64k_SensorM_256k_SizeL_1Hrs_M_5Hrs_L
 Scenario.name = scenario-TJ-%%Group.router%%-AVERAGE_DELAY
+#Scenario.name = scenario-TJ-%%Group.router%%-MISSED_DEADLINES
+#Scenario.name = scenario-TJ-%%Group.router%%-MAXIMUM_DELAY
 Scenario.simulateConnections = true
-Scenario.updateInterval = 1
+Scenario.updateInterval = 0.1
 # 43200 == 12h
 # 64800 == 18h
 # 68400 == 19h
@@ -21,12 +23,12 @@ Scenario.endTime = 68400
 
 #interface for 802.11p link profile
 w802-11pInterface.type = SimpleBroadcastInterface
-w802-11pInterface.transmitSpeed = 750k
+w802-11pInterface.transmitSpeed = 6M
 w802-11pInterface.transmitRange = 100
 
 # interface for 802.15.4 link profile
 w802-15-4Interface.type = SimpleBroadcastInterface
-w802-15-4Interface.transmitSpeed = 250k
+w802-15-4Interface.transmitSpeed = 2M
 w802-15-4Interface.transmitRange = 15
 
 # interface for 802.11a link profile
@@ -59,11 +61,11 @@ Scenario.nrofHostGroups = 64
 # Common settings for all groups
 Group.movementModel = MapRouteMovementWithStop
 
-#Group.router = EpidemicRouter
+Group.router = RapidRouterTest
 
 #RapidWithKnapsackRouter
-Group.router = DecisionEngineRapidKnapsackRouter
-DecisionEngineRapidKnapsackRouter.decisionEngine = RapidWithKnapsackRouter
+#Group.router = DecisionEngineRapidKnapsackRouter
+#DecisionEngineRapidKnapsackRouter.decisionEngine = RapidWithKnapsackRouter
 
 #Group.router = DecisionEngineRapidRouter
 #DecisionEngineRapidRouter.decisionEngine = testRapidDE
@@ -174,7 +176,7 @@ Group11.movementModel = StationaryMovement
 Group11.nodeLocation = 1175,6305
 Group11.nrofHosts = 1
 Group11.nrofInterfaces = 1
-Group11.msgTtl = 300
+#Group11.msgTtl = 300
 Group11.interface1 = w802-15-4Interface
 
 Group12.groupID = s
@@ -191,7 +193,7 @@ Group13.movementModel = StationaryMovement
 Group13.nodeLocation = 5640,10200
 Group13.nrofHosts = 1
 Group13.nrofInterfaces = 1
-Group13.msgTtl = 300
+#Group13.msgTtl = 300
 Group13.interface1 = w802-15-4Interface
 
 Group14.groupID = s
@@ -200,7 +202,7 @@ Group14.movementModel = StationaryMovement
 Group14.nodeLocation = 5955,7887
 Group14.nrofHosts = 1
 Group14.nrofInterfaces = 1
-Group14.msgTtl = 300
+#Group14.msgTtl = 300
 Group14.interface1 = w802-15-4Interface
 
 Group15.groupID = s
@@ -209,7 +211,7 @@ Group15.movementModel = StationaryMovement
 Group15.nodeLocation = 6799,7995
 Group15.nrofHosts = 1
 Group15.nrofInterfaces = 1
-Group15.msgTtl = 300
+#Group15.msgTtl = 300
 Group15.interface1 = w802-15-4Interface
 
 Group16.groupID = s
@@ -218,7 +220,7 @@ Group16.movementModel = StationaryMovement
 Group16.nodeLocation = 7635,8125
 Group16.nrofHosts = 1
 Group16.nrofInterfaces = 1
-Group16.msgTtl = 300
+#Group16.msgTtl = 300
 Group16.interface1 = w802-15-4Interface
 
 Group17.groupID = s
@@ -243,7 +245,7 @@ Group19.movementModel = StationaryMovement
 Group19.nodeLocation = 8897,6490
 Group19.nrofHosts = 1
 Group19.nrofInterfaces = 1
-Group19.msgTtl = 300
+#Group19.msgTtl = 300
 Group19.interface1 = w802-15-4Interface
 
 Group20.groupID = s
@@ -276,7 +278,7 @@ Group23.movementModel = StationaryMovement
 Group23.nodeLocation = 7060,4835
 Group23.nrofHosts = 1
 Group23.nrofInterfaces = 1
-Group23.msgTtl = 300
+#Group23.msgTtl = 300
 Group23.interface1 = w802-15-4Interface
 
 Group24.groupID = s
@@ -317,7 +319,7 @@ Group28.movementModel = StationaryMovement
 Group28.nodeLocation = 6047,2025
 Group28.nrofHosts = 1
 Group28.nrofInterfaces = 1
-Group28.msgTtl = 300
+#Group28.msgTtl = 300
 Group28.interface1 = w802-15-4Interface
 
 Group29.groupID = s
@@ -326,7 +328,7 @@ Group29.movementModel = StationaryMovement
 Group29.nodeLocation = 7056,2445
 Group29.nrofHosts = 1
 Group29.nrofInterfaces = 1
-Group29.msgTtl = 300
+#Group29.msgTtl = 300
 Group29.interface1 = w802-15-4Interface
 
 Group30.groupID = s
@@ -367,7 +369,7 @@ Group34.movementModel = StationaryMovement
 Group34.nodeLocation = 18580,1420
 Group34.nrofHosts = 1
 Group34.nrofInterfaces = 1
-Group34.msgTtl = 300
+#Group34.msgTtl = 300
 Group34.interface1 = w802-15-4Interface
 
 Group35.groupID = s
@@ -376,7 +378,7 @@ Group35.movementModel = StationaryMovement
 Group35.nodeLocation = 4370,9330
 Group35.nrofHosts = 1
 Group35.nrofInterfaces = 1
-Group35.msgTtl = 300
+#Group35.msgTtl = 300
 Group35.interface1 = w802-15-4Interface
 
 Group36.groupID = s
@@ -385,7 +387,7 @@ Group36.movementModel = StationaryMovement
 Group36.nodeLocation = 9670,6510
 Group36.nrofHosts = 1
 Group36.nrofInterfaces = 1
-Group36.msgTtl = 300
+#Group36.msgTtl = 300
 Group36.interface1 = w802-15-4Interface
 
 Group37.groupID = s
@@ -402,7 +404,7 @@ Group38.movementModel = StationaryMovement
 Group38.nodeLocation = 7870,3785
 Group38.nrofHosts = 1
 Group38.nrofInterfaces = 1
-Group38.msgTtl = 300
+#Group38.msgTtl = 300
 Group38.interface1 = w802-15-4Interface
 
 Group39.groupID = s
@@ -419,7 +421,7 @@ Group40.movementModel = StationaryMovement
 Group40.nodeLocation = 4615,6375
 Group40.nrofHosts = 1
 Group40.nrofInterfaces = 1
-Group40.msgTtl = 300
+#Group40.msgTtl = 300
 Group40.interface1 = w802-15-4Interface
 
 Group41.groupID = s
@@ -436,7 +438,7 @@ Group42.movementModel = StationaryMovement
 Group42.nodeLocation = 2115,6265
 Group42.nrofHosts = 1
 Group42.nrofInterfaces = 1
-Group42.msgTtl = 300
+#Group42.msgTtl = 300
 Group42.interface1 = w802-15-4Interface
 
 Group43.groupID = s
@@ -445,7 +447,7 @@ Group43.movementModel = StationaryMovement
 Group43.nodeLocation = 5850,3815
 Group43.nrofHosts = 1
 Group43.nrofInterfaces = 1
-Group43.msgTtl = 300
+#Group43.msgTtl = 300
 Group43.interface1 = w802-15-4Interface
 
 Group44.groupID = s
@@ -454,7 +456,7 @@ Group44.movementModel = StationaryMovement
 Group44.nodeLocation = 5105,4340
 Group44.nrofHosts = 1
 Group44.nrofInterfaces = 1
-Group44.msgTtl = 300
+#Group44.msgTtl = 300
 Group44.interface1 = w802-15-4Interface
 
 Group45.groupID = s
@@ -463,7 +465,7 @@ Group45.movementModel = StationaryMovement
 Group45.nodeLocation = 4205,4213
 Group45.nrofHosts = 1
 Group45.nrofInterfaces = 1
-Group45.msgTtl = 300
+#Group45.msgTtl = 300
 Group45.interface1 = w802-15-4Interface
 
 Group46.groupID = s
@@ -472,7 +474,7 @@ Group46.movementModel = StationaryMovement
 Group46.nodeLocation = 7080,6440
 Group46.nrofHosts = 1
 Group46.nrofInterfaces = 1
-Group46.msgTtl = 300
+#Group46.msgTtl = 300
 Group46.interface1 = w802-15-4Interface
 
 Group47.groupID = s
@@ -571,15 +573,15 @@ Group64.nrofHosts = 4
 
 ## Message creation parameters 
 # How many event generators
-Events.nrof = 2
-#Events.nrof = 1
+#Events.nrof = 2
+Events.nrof = 1
 # Class of the first event generator
 #Events1.class = MessageEventGenerator
 Events1.class = ExternalEventsQueue
 Events1.filePath = CreatedMessagePolutions.txt
 
-Events2.class = ExternalEventsQueue
-Events2.filePath = CreatedMessageLaluLintas.txt
+#Events2.class = ExternalEventsQueue
+#Events2.filePath = CreatedMessageLaluLintas.txt
 
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
@@ -609,25 +611,28 @@ MapBasedMovement.mapFile1 = data/JalurTJ.wkt
 ## Reports - all report names have to be valid report classes
 
 # how many reports to load
-Report.nrofReports = 2
+Report.nrofReports = 6
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
-Report.reportDir = reports/BusTj/testDE/2/
-Report.reportDir = reports/BusTj/testKP/1/
+#Report.reportDir = reports/BusTj/testDE/2/
+Report.reportDir = reports/BusTj/testRRA/1/
+#Report.reportDir = reports/BusTj/testKP1/1/
+#Report.reportDir = reports/BusTj/testEpidemic/1/
 # Report classes to load
-#Report.report1 = MessageStatsReport
-Report.report1 = ReportBusPesanLalulintas
-Report1.ToNodeID=L
-Report.report2 = ReportBusPesanPolusi
-Report2.ToNodeID=M
 
-#Report.report1 = MessageStatsReport
-#Report.report2 = LatencyPerContactReport
-#Report.report3 = MessageDeliveredPerContactReport
-#Report.report4 = PercentageMessageDeliveredPerContactReport
-#Report.report5 = OverheadPerContactReport
-#Report.report6 = BufferOccupancyPerContact
+#Report.report1 = ReportBusPesanLalulintas
+#Report1.ToNodeID=L
+#Report.report1 = ReportBusPesanPolusi
+#Report1.ToNodeID=M
+#Report.report2 = MessageStatsReport
+
+Report.report1 = MessageStatsReport
+Report.report2 = LatencyPerContactReport
+Report.report3 = MessageDeliveredPerContactReport
+Report.report4 = PercentageMessageDeliveredPerContactReport
+Report.report5 = OverheadPerContactReport
+Report.report6 = BufferOccupancyPerContact
 
 ## Default settings for some routers settings
 ProphetRouter.secondsInTimeUnit = 30

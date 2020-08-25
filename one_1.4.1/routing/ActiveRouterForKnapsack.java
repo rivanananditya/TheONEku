@@ -60,6 +60,9 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
     LinkedList<Double> utilityMsg;
     LinkedList<Message> getLowestUtilMsg;
     LinkedList<Message> tempMsg;
+    //1000
+    //500000
+    private static final int lengthAwal = 1000 - 1;
 
     /**
      * Constructor. Creates a new message router based on the settings in the
@@ -293,6 +296,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
 
         int freeBuffer = this.getFreeBufferSize();
         if (freeBuffer < size) {
+//            getUtilSizeMsg();
             LinkedList<Message> m = knapsackDrop(size);
             if (m != null) {
                 for (int i = 0; i < m.size(); i++) {
@@ -302,7 +306,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
 //                    System.out.println("pesan di drop "+m.get(i).getId());
                     deleteMessage(m.get(i).getId(), true);
                 }
-                
+
                 getLowestUtilMsg.clear();
 //                System.out.println(getLowestUtilMsg);
             } else {
@@ -324,8 +328,8 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
         //999
         //499999
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = 999; length <= restriction; length++) {
-                if (i == 0 || length == 999) {
+            for (int length = lengthAwal; length <= restriction; length++) {
+                if (i == 0 || length == lengthAwal) {
                     bestSolution[i][length] = 0;
                 } else if (lengthMsg.get(i - 1) <= length) {
                     bestSolution[i][length] = Math.max(bestSolution[i - 1][length],

@@ -98,6 +98,7 @@ public interface RoutingDecisionEngineRapidKnapsack
 	 * @return true if the message should be deleted. False otherwise.
 	 */
 	public boolean shouldDeleteSentMessage(Message m, DTNHost otherHost);
+//	public List<Message>pesanTerpilih();
 	
 	/**
 	 * Called if an attempt was unsuccessfully made to transfer a message to a 

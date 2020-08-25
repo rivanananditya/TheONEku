@@ -10,61 +10,62 @@ import core.*;
  * method as possible.
  *
  * <strong>Forwarding Logic:</strong>
-
- A DecisionEngineRapidRouter maintains a List of Tuple<Message, Connection> in
- support of a call to ActiveRouter.tryMessagesForConnected() in
- DecisionEngineRapidRouter.update(). Since update() is called so frequently, we'd
- like as little computation done in it as possible; hence the List that gets
- updated when events happen. Four events cause the List to be updated: a new
- message from this host, a new received message, a connection goes up, or a
- connection goes down. On a new message (either from this host or received
- from a peer), the collection of open connections is examined to see if the
- message should be forwarded along them. If so, a new Tuple is added to the
- List. When a connection goes up, the collection of messages is examined to
- determine to determine if any should be sent to this new peer, adding a Tuple
- to the list if so. When a connection goes down, any Tuple in the list
- associated with that connection is removed from the List.
-
- <strong>Decision Engines</strong>
-
- Most (if not all) routing decision making is provided by a
- RoutingDecisionEngineRapid object. The DecisionEngine Interface defines methods
- that enact computation and return decisions as follows:
-
- <ul>
- * <li>In createNewMessage(), a call to RoutingDecisionEngineRapid.newMessage() is
- made. A return value of true indicates that the message should be added to
- the message store for routing. A false value indicates the message should be
- discarded.
- </li>
+ *
+ * A DecisionEngineRapidRouter maintains a List of Tuple<Message, Connection> in
+ * support of a call to ActiveRouter.tryMessagesForConnected() in
+ * DecisionEngineRapidRouter.update(). Since update() is called so frequently,
+ * we'd like as little computation done in it as possible; hence the List that
+ * gets updated when events happen. Four events cause the List to be updated: a
+ * new message from this host, a new received message, a connection goes up, or
+ * a connection goes down. On a new message (either from this host or received
+ * from a peer), the collection of open connections is examined to see if the
+ * message should be forwarded along them. If so, a new Tuple is added to the
+ * List. When a connection goes up, the collection of messages is examined to
+ * determine to determine if any should be sent to this new peer, adding a Tuple
+ * to the list if so. When a connection goes down, any Tuple in the list
+ * associated with that connection is removed from the List.
+ *
+ * <strong>Decision Engines</strong>
+ *
+ * Most (if not all) routing decision making is provided by a
+ * RoutingDecisionEngineRapid object. The DecisionEngine Interface defines
+ * methods that enact computation and return decisions as follows:
+ *
+ * <ul>
+ * <li>In createNewMessage(), a call to RoutingDecisionEngineRapid.newMessage()
+ * is made. A return value of true indicates that the message should be added to
+ * the message store for routing. A false value indicates the message should be
+ * discarded.
+ * </li>
  * <li>changedConnection() indicates either a connection went up or down. The
- appropriate connectionUp() or connectionDown() method is called on the
- RoutingDecisionEngineRapid object. Also, on connection up events, this first peer
- to call changedConnection() will also call
- RoutingDecisionEngineRapid.doExchangeForNewConnection() so that the two decision
- engine objects can simultaneously exchange information and update their
- routing tables (without fear of this method being called a second time).
- </li>
+ * appropriate connectionUp() or connectionDown() method is called on the
+ * RoutingDecisionEngineRapid object. Also, on connection up events, this first
+ * peer to call changedConnection() will also call
+ * RoutingDecisionEngineRapid.doExchangeForNewConnection() so that the two
+ * decision engine objects can simultaneously exchange information and update
+ * their routing tables (without fear of this method being called a second
+ * time).
+ * </li>
  * <li>Starting a Message transfer, a protocol first asks the neighboring peer
- if it's okay to send the Message. If the peer indicates that the Message is
- OLD or DELIVERED, call to RoutingDecisionEngineRapid.shouldDeleteOldMessage() is
- made to determine if the Message should be removed from the message store.
- <em>Note: if tombstones are enabled or deleteDelivered is disabled, the
+ * if it's okay to send the Message. If the peer indicates that the Message is
+ * OLD or DELIVERED, call to RoutingDecisionEngineRapid.shouldDeleteOldMessage()
+ * is made to determine if the Message should be removed from the message store.
+ * <em>Note: if tombstones are enabled or deleteDelivered is disabled, the
  * Message will be deleted and no call to this method will be made.</em>
  * </li>
  * <li>When a message is received (in messageTransferred), a call to
- RoutingDecisionEngineRapid.isFinalDest() to determine if the receiving (this) host
- is an intended recipient of the Message. Next, a call to
- RoutingDecisionEngineRapid.shouldSaveReceivedMessage() is made to determine if the
- new message should be stored and attempts to forward it on should be made. If
- so, the set of Connections is examined for transfer opportunities as
- described above.
- </li>
+ * RoutingDecisionEngineRapid.isFinalDest() to determine if the receiving (this)
+ * host is an intended recipient of the Message. Next, a call to
+ * RoutingDecisionEngineRapid.shouldSaveReceivedMessage() is made to determine
+ * if the new message should be stored and attempts to forward it on should be
+ * made. If so, the set of Connections is examined for transfer opportunities as
+ * described above.
+ * </li>
  * <li> When a message is sent (in transferDone()), a call to
- RoutingDecisionEngineRapid.shouldDeleteSentMessage() is made to ask if the
- departed Message now residing on a peer should be removed from the message
- store.
- </li>
+ * RoutingDecisionEngineRapid.shouldDeleteSentMessage() is made to ask if the
+ * departed Message now residing on a peer should be removed from the message
+ * store.
+ * </li>
  * </ul>
  *
  * <strong>Tombstones</strong>
@@ -204,13 +205,7 @@ public class DecisionEngineRapidKnapsackRouter extends ActiveRouterForKnapsack {
                     outgoingMessages.add(new Tuple<Message, Connection>(m, con));
                 }
             }
-            
-//            Message[] msg = (Message[]) getHost().getMessageCollection().toArray();
-//            for (int i = 0; i < msg.length; i++) {
-//                if (decider.shouldSendMessageToHost(msg[i], otherNode, myHost)) {
-//                    outgoingMessages.add(new Tuple<Message, Connection>(msg[i], con));
-//                }
-//            }
+
         } else {
             decider.connectionDown(con, myHost, otherNode);
 
@@ -237,7 +232,7 @@ public class DecisionEngineRapidKnapsackRouter extends ActiveRouterForKnapsack {
 
     /**
      * Called by a peer DecisionEngineRapidRouter to indicated that it already
- performed an information exchange for the given connection.
+     * performed an information exchange for the given connection.
      *
      * @param con Connection on which the exchange was performed
      */
@@ -359,11 +354,11 @@ public class DecisionEngineRapidKnapsackRouter extends ActiveRouterForKnapsack {
         if (!canStartTransfer() || isTransferring()) {
             return; // nothing to transfer or is currently transferring 
         }
-        
-        if(!isTransferring()){
+
+        if (!isTransferring()) {
             decider.deletedAckMsgInDelayTable(getHost());
         }
-        
+
         tryMessagesForConnected(outgoingMessages);
 //        tryMessagesForConnected(sortByQueueMode(outgoingMessages));
 
