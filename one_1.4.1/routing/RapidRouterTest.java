@@ -30,7 +30,7 @@ import routing.community.Duration;
 /**
  * RAPID router
  */
-public class RapidRouterTest extends ActiveRouter{
+public class RapidRouterTest extends ActiveRouter {
     // timestamp for meeting a host in seconds
 
     private double timestamp;
@@ -55,6 +55,7 @@ public class RapidRouterTest extends ActiveRouter{
     LinkedList<Message> tempMsgDrop;
     LinkedList<Message> tempMsgTerpilih;
     LinkedList<Message> tempMsgLowersUtil;
+    private DTNHost getOtherHost;
     //1000
     //500000
     private static final int lengthAwal = 100000 - 1;
@@ -81,6 +82,7 @@ public class RapidRouterTest extends ActiveRouter{
         tempMsgDrop = new LinkedList<Message>();
         tempMsgTerpilih = new LinkedList<Message>();
         tempMsgLowersUtil = new LinkedList<Message>();
+        getOtherHost = null;
     }
 
     @Override
@@ -111,12 +113,15 @@ public class RapidRouterTest extends ActiveRouter{
         tempMsgDrop = r.tempMsgDrop;
         tempMsgTerpilih = r.tempMsgTerpilih;
         tempMsgLowersUtil = r.tempMsgLowersUtil;
+        getOtherHost = r.getOtherHost;
     }
 
     @Override
     public void changedConnection(Connection con) {
         if (con.isUp()) {
+            
             DTNHost otherHost = con.getOtherNode(getHost());
+            this.getOtherHost = otherHost;
 //            System.out.println(getHost() + " con " + otherHost);
             this.startTimestamps.put(otherHost, SimClock.getTime());
             /* new connection */
@@ -135,8 +140,9 @@ public class RapidRouterTest extends ActiveRouter{
 
             delayTable.dummyUpdateConnection(con);
 
-            cekSyaratKnapsack(getHost(), otherHost);
-            getSyaratKnapsackDrop(getHost(), otherHost);
+            cekSyaratKnapsackSend(getHost(), otherHost);
+//            getUtilityMsgToArrForDrop(getHost(), otherHost);
+//            getSyaratKnapsackDrop(getHost(), otherHost);
 
         } else {
             /* connection went down */
@@ -165,7 +171,7 @@ public class RapidRouterTest extends ActiveRouter{
             if (etime - times > 0) {
                 history.add(new Duration(times, etime));
             }
-
+//            getUtilityMsgToArrForDrop(getHost(), otherHost);
             this.connHistory.put(otherHost, history);
             this.startTimestamps.remove(otherHost);
 
@@ -177,6 +183,7 @@ public class RapidRouterTest extends ActiveRouter{
             this.tempMsgDrop.clear();
             this.tempMsgTerpilih.clear();
             this.tempMsgLowersUtil.clear();
+//            this.getOtherHost = null;
         }
     }
 
@@ -438,7 +445,7 @@ public class RapidRouterTest extends ActiveRouter{
 
         //if message was created successfully add the according delay table entry
         if (stat) {
-            updateDelayTableEntry(m, getHost(), estimateDelay(m, getHost(), true), SimClock.getTime());            
+            updateDelayTableEntry(m, getHost(), estimateDelay(m, getHost(), true), SimClock.getTime());
         }
 
         return stat;
@@ -697,9 +704,9 @@ public class RapidRouterTest extends ActiveRouter{
     @Override
     public void update() {
         super.update();
-        
+
 //        ckeckConnectionStatus();
-        dropMSg();
+//        dropMSg();
         if (isTransferring() || !canStartTransfer()) {
             return;
         }
@@ -731,7 +738,7 @@ public class RapidRouterTest extends ActiveRouter{
             if (otherRouter.isTransferring()) {
                 continue; // skip hosts that are transferring
             }
-            
+
             double mu = 0.0;
             for (Message m : tempMsgTerpilih) {
                 if (otherRouter.hasMessage(m.getId())) {
@@ -863,7 +870,7 @@ public class RapidRouterTest extends ActiveRouter{
         }
     }
 
-    public void cekSyaratKnapsack(DTNHost thisHost, DTNHost otherHost) {
+    public void cekSyaratKnapsackSend(DTNHost thisHost, DTNHost otherHost) {
         if (getSyaratKnapsack(thisHost, otherHost)) {
 //            System.out.println("test");
             getUtilityMsgToArrForSend(thisHost, otherHost);
@@ -878,13 +885,13 @@ public class RapidRouterTest extends ActiveRouter{
         int isiBuffer = thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize();
         return isiBuffer > retriction;
     }
-    public void getSyaratKnapsackDrop(DTNHost thisHost, DTNHost otherHost) {
-        if(thisHost.getBufferOccupancy() > 90.0){
-            getUtilityMsgToArrForDrop(thisHost, otherHost);
-            knapsackDrop(thisHost);
-        }
-    }
 
+//    public void getSyaratKnapsackDrop(DTNHost thisHost, DTNHost otherHost) {
+//        if (thisHost.getBufferOccupancy() > 90.0) {
+//            getUtilityMsgToArrForDrop(thisHost, otherHost);
+//            knapsackDrop(thisHost);
+//        }
+//    }
     public int getRetrictionForSend(DTNHost thisHost, DTNHost otherHost) {
         int retriction;
         int avgDuration = (int) getAvgDurations(otherHost);
@@ -901,18 +908,18 @@ public class RapidRouterTest extends ActiveRouter{
     }
 
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
-        Collection<Message> msgCollection = thisHost.getMessageCollection();
-        for (Message m : msgCollection) {
+//        Collection<Message> msgCollection = thisHost.getMessageCollection();
+        for (Message m : thisHost.getMessageCollection()) {
             lengthMsg.add(m.getSize()); //in bit
             utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsg);
 //        System.out.println(lengthMsg);
     }
-    
+
     public void getUtilityMsgToArrForDrop(DTNHost thisHost, DTNHost otherHost) {
-        Collection<Message> msgCollection = thisHost.getMessageCollection();
-        for (Message m : msgCollection) {
+//        Collection<Message> msgCollection = thisHost.getMessageCollection();
+        for (Message m : thisHost.getMessageCollection()) {
             lengthMsgDrop.add(m.getSize()); //in bit
             utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
         }
@@ -947,6 +954,9 @@ public class RapidRouterTest extends ActiveRouter{
                 tempMsgTerpilih.add(tempMsg.get(j - 1));
                 temp = temp - lengthMsg.get(j - 1);
             }
+            if (temp == 0) {
+                break;
+            }
 //            else{
 //                tempMsgLowersUtil.add(tempMsg.get(j-1));
 //            }
@@ -954,13 +964,13 @@ public class RapidRouterTest extends ActiveRouter{
 //        System.out.println(tempMsgTerpilih);
 //        System.out.println("hapus "+tempMsgLowersUtil);
     }
-    
-    public void knapsackDrop(DTNHost thisHost) {
+
+    public void knapsackDrop(int size) {
         tempMsgDrop.addAll(this.getMessageCollection());
         int jumlahMsg = 0;
         int retriction = 0;
         jumlahMsg = tempMsgDrop.size();
-        retriction = thisHost.getRouter().getBufferSize();
+        retriction = getHost().getRouter().getBufferSize() - size;
 
         double[][] bestSolution = new double[jumlahMsg + 1][retriction + 1];
 
@@ -981,23 +991,44 @@ public class RapidRouterTest extends ActiveRouter{
             if (bestSolution[j][temp] > bestSolution[j - 1][temp]) {
 //                tempMsgTerpilih.add(tempMsg.get(j - 1));
                 temp = temp - lengthMsgDrop.get(j - 1);
-            }
-            else{
-                tempMsgLowersUtil.add(tempMsgDrop.get(j-1));
+            } else {
+                tempMsgLowersUtil.add(tempMsgDrop.get(j - 1));
             }
         }
 //        System.out.println(tempMsgTerpilih);
 //        System.out.println("hapus "+tempMsgLowersUtil);
     }
-    
-    public void dropMSg(){
+
+    public void dropMSg() {
         for (Message m : tempMsgLowersUtil) {
 //            if(!isSending(m.getId())){
-            if(this.hasMessage(m.getId()) && !isSending(m.getId())){
-//                System.out.println("hapus pesan "+m.getId());
+            if (this.hasMessage(m.getId()) && !isSending(m.getId())) {
+//                System.out.println("hapus pesan " + m.getId());
                 deleteMessage(m.getId(), true);
 //                tempMsgLowersUtil.remove();
             }
         }
     }
+
+    @Override
+    protected boolean makeRoomForMessage(int size) {
+        if (size > this.getBufferSize()) {
+            return false; // message too big for the buffer
+        }
+
+        int freeBuffer = this.getFreeBufferSize();
+        /* delete messages from the buffer until there's enough space */
+        if (freeBuffer < size) {
+//            DTNHost otherHost = getOtherHost;
+            getUtilityMsgToArrForDrop(getHost(), getOtherHost);
+            knapsackDrop(size);
+            dropMSg();
+        }
+
+        return true;
+    }
+
+//    public DTNHost getOtherHostt(){
+//        return this.getOtherHost;
+//    }
 }

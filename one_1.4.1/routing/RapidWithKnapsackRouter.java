@@ -150,7 +150,7 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
         this.tempMsgTerpilih.clear();
 //        System.out.println("temp down "+tempMsgTerpilih);
         bestSolution = null;
-        System.out.println(thisHost + " con down " + otherHost);
+        System.out.println(thisHost + " con  " + otherHost);
     }
 
     @Override
@@ -199,7 +199,8 @@ public class RapidWithKnapsackRouter implements RoutingDecisionEngineRapidKnapsa
     @Override
     public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost) {
         System.out.println("psan " + m);
-        if (tempMsgTerpilih != null) {           
+        if (tempMsgTerpilih != null) {
+            
             if (tempMsgTerpilih.contains(m)) {
                 return true;
 
