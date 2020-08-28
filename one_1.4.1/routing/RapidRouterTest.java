@@ -706,7 +706,7 @@ public class RapidRouterTest extends ActiveRouter {
         super.update();
 
 //        ckeckConnectionStatus();
-//        dropMSg();
+        dropMSg();
         if (isTransferring() || !canStartTransfer()) {
             return;
         }
@@ -730,10 +730,10 @@ public class RapidRouterTest extends ActiveRouter {
         for (Connection con : getConnections()) {
             DTNHost other = con.getOtherNode(getHost());
             RapidRouterTest otherRouter = (RapidRouterTest) other.getRouter();
-//            if (String.valueOf(other.toString().charAt(0)).equals("s")) {
-////                System.out.println("ktemu sensor");
-//                continue;
-//            }
+            if (String.valueOf(other.toString().charAt(0)).equals("s")) {
+//                System.out.println("ktemu sensor");
+                continue;
+            }
 
             if (otherRouter.isTransferring()) {
                 continue; // skip hosts that are transferring
@@ -910,7 +910,7 @@ public class RapidRouterTest extends ActiveRouter {
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-            lengthMsg.add(m.getSize()); //in bit
+            lengthMsg.add(m.getSize()/8); //in bit
             utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsg);
