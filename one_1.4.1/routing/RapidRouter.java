@@ -35,7 +35,7 @@ public class RapidRouter extends ActiveRouter {
     // minimizing maximum delay)
     private Map<Integer, DTNHost> hostMapping;
 
-    private final UtilityAlgorithm ALGORITHM = UtilityAlgorithm.AVERAGE_DELAY;
+    private final UtilityAlgorithm ALGORITHM = UtilityAlgorithm.MISSED_DEADLINES;
     private static final double INFINITY = 99999;
 
     // interval to verify ongoing connections in seconds
@@ -62,7 +62,7 @@ public class RapidRouter extends ActiveRouter {
 
 //        delayTable = new DelayTable(super.getHost());
         delayTable = new DelayTable(host);
-        System.out.println(host);
+//        System.out.println(host);
     }
 
     /**
@@ -692,7 +692,7 @@ public class RapidRouter extends ActiveRouter {
             return null;
         }
 
-        Collections.sort(messages, new TupleComparator2());
+        Collections.sort(messages, new TupleComparator());
         return tryTupleMessagesForConnected(messages);	// try to send messages
     }
 
@@ -736,9 +736,9 @@ public class RapidRouter extends ActiveRouter {
      * Comparator for Message-Connection-Double-Tuples that orders the tuples by
      * their double value
      */
-    private class TupleComparator2 implements Comparator<Tuple<Tuple<Message, Connection>, Double>> {
+    private class TupleComparator implements Comparator<Tuple<Tuple<Message, Connection>, Double>> {
 
-        @Override
+        
         public int compare(Tuple<Tuple<Message, Connection>, Double> tuple1, Tuple<Tuple<Message, Connection>, Double> tuple2) {
             // tuple1...
             double mu1 = tuple1.getValue();

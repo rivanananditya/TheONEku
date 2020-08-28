@@ -135,6 +135,8 @@ public class RapidRouterTest extends ActiveRouter {
             synchronizeMeetingTimes(con);
 
             updateDelayTableStat(con);
+            synchronizeAckedMessageIDs(con);
+            deleteAckedMessages();
 
             doHostMapping(con);
 
@@ -149,7 +151,10 @@ public class RapidRouterTest extends ActiveRouter {
             //update connection
             double time = SimClock.getTime() - timestamp;
             delayTable.updateConnection(con, time);
-
+            
+            synchronizeAckedMessageIDs(con);
+            deleteAckedMessages();
+            updateAckedMessageIds();
             synchronizeDelayTables(con);
 
             DTNHost otherHost = con.getOtherNode(getHost());

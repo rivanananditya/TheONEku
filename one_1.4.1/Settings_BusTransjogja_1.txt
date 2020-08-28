@@ -25,18 +25,18 @@ Scenario.endTime = 64800
 w802-11pInterface.type = SimpleBroadcastInterface
 #250kbps = 38kBps
 #2Mbps = 250kBps
-w802-11pInterface.transmitSpeed = 750k
-w802-11pInterface.transmitRange = 100
+w802-11pInterface.transmitSpeed = 5M
+w802-11pInterface.transmitRange = 50
 
 # interface for 802.15.4 link profile
 w802-11Interface.type = SimpleBroadcastInterface
-w802-11Interface.transmitSpeed = 250k
-w802-11Interface.transmitRange = 30
+w802-11Interface.transmitSpeed = 1M
+w802-11Interface.transmitRange = 15
 
 # interface for 802.11b link profile
 w802-11bInterface.type = SimpleBroadcastInterface
-w802-11bInterface.transmitSpeed = 375k
-w802-11bInterface.transmitRange = 50
+w802-11bInterface.transmitSpeed = 2M
+w802-11bInterface.transmitRange = 25
 
 Scenario.nrofHostGroups = 59
 
@@ -83,7 +83,7 @@ Group.interface3 = w802-11Interface
 # Kecepata Bus Transjogja
 Group.speed = 3, 8
 # Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 120
+Group.msgTtl = 60
 Group.stopFile = data/CoordStopPoint.txt
 Group.stopTime = 5, 30
 #Group.stopTime = 60, 120
@@ -522,7 +522,7 @@ Events.nrof = 1
 # Class of the first event generator
 #Events1.class = MessageEventGenerator
 Events1.class = ExternalEventsQueue
-Events1.filePath = CreatedMsgLaluLintas.txt
+Events1.filePath = CreatedMsgLaluLintas1800.txt
 
 #Events2.class = ExternalEventsQueue
 #Events2.filePath = CreatedMessageLaluLintas.txt
