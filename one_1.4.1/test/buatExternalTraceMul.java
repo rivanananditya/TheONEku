@@ -19,7 +19,7 @@ public class buatExternalTraceMul {
     public static void main(String[] args) {
         Random random = new Random();
         // TODO code application logic here
-        for (int i = 0; i < 61200; i=i+3600) {
+        for (int i = 0; i < 61200; i=i+900) {
             for (int j = 0; j < 38; j++) {
                 System.out.println(i);
             }

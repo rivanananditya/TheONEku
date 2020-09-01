@@ -134,11 +134,11 @@ public class RapidRouterTest extends ActiveRouter {
             //synchronize all meeting time entries 
             synchronizeMeetingTimes(con);
 
-            updateDelayTableStat(con);
-            synchronizeAckedMessageIDs(con);
-            deleteAckedMessages();
+//            updateDelayTableStat(con);
+//            synchronizeAckedMessageIDs(con);
+//            deleteAckedMessages();
 
-            doHostMapping(con);
+//            doHostMapping(con);
 
             delayTable.dummyUpdateConnection(con);
 
@@ -152,9 +152,9 @@ public class RapidRouterTest extends ActiveRouter {
             double time = SimClock.getTime() - timestamp;
             delayTable.updateConnection(con, time);
             
-            synchronizeAckedMessageIDs(con);
-            deleteAckedMessages();
-            updateAckedMessageIds();
+//            synchronizeAckedMessageIDs(con);
+//            deleteAckedMessages();
+//            updateAckedMessageIds();
             synchronizeDelayTables(con);
 
             DTNHost otherHost = con.getOtherNode(getHost());
@@ -212,7 +212,7 @@ public class RapidRouterTest extends ActiveRouter {
                 delayTable.updateConnection(con, time);
 
                 //synchronize acked message ids
-                synchronizeAckedMessageIDs(con);
+//                synchronizeAckedMessageIDs(con);
 
                 //update set of messages that are known to have reached the destination 
                 deleteAckedMessages();
@@ -234,12 +234,12 @@ public class RapidRouterTest extends ActiveRouter {
                 updateDelayTableStat(con);
 
                 //synchronize acked message ids
-                synchronizeAckedMessageIDs(con);
+//                synchronizeAckedMessageIDs(con);
 
                 deleteAckedMessages();
 
                 //map DTNHost to their address
-                doHostMapping(con);
+//                doHostMapping(con);
 
                 delayTable.dummyUpdateConnection(con);
             }
@@ -394,9 +394,9 @@ public class RapidRouterTest extends ActiveRouter {
         Message m = super.messageTransferred(id, from);
 
         /* was this node the final recipient of the message? */
-        if (isDeliveredMessage(m)) {
-            delayTable.addAckedMessageIds(id);
-        }
+//        if (isDeliveredMessage(m)) {
+//            delayTable.addAckedMessageIds(id);
+//        }
 
         return m;
     }
@@ -711,7 +711,7 @@ public class RapidRouterTest extends ActiveRouter {
         super.update();
 
 //        ckeckConnectionStatus();
-        dropMSg();
+//        dropMSg();
         if (isTransferring() || !canStartTransfer()) {
             return;
         }
@@ -887,7 +887,7 @@ public class RapidRouterTest extends ActiveRouter {
 
     public boolean getSyaratKnapsack(DTNHost thisHost, DTNHost otherHost) {
         int retriction = getRetrictionForSend(thisHost, otherHost);
-        int isiBuffer = thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize();
+        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize())/8);
         return isiBuffer > retriction;
     }
 
@@ -901,8 +901,8 @@ public class RapidRouterTest extends ActiveRouter {
         int retriction;
         int avgDuration = (int) getAvgDurations(otherHost);
 
-        int tfSpeed = getTransferSpeed(thisHost);
-        int tfSpeed1 = (int) this.delayTable.getAvgTransferOpportunity();
+        int tfSpeed = getTransferSpeed(thisHost); //in bytes
+//        int tfSpeed1 = (int) this.delayTable.getAvgTransferOpportunity();
         retriction = Math.abs(avgDuration * tfSpeed);
 
         return retriction;
@@ -915,7 +915,7 @@ public class RapidRouterTest extends ActiveRouter {
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-            lengthMsg.add(m.getSize()/8); //in bit
+            lengthMsg.add(m.getSize()/8); //in byte
             utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsg);
@@ -926,9 +926,9 @@ public class RapidRouterTest extends ActiveRouter {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
             lengthMsgDrop.add(m.getSize()); //in bit
-            utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
+            utilityMsgDrop.add(-1*getMarginalUtility(m, otherHost, thisHost));
         }
-//        System.out.println(utilityMsg);
+        System.out.println(utilityMsgDrop);
 //        System.out.println(lengthMsg);
     }
 
@@ -944,7 +944,7 @@ public class RapidRouterTest extends ActiveRouter {
         for (int i = 0; i <= jumlahMsg; i++) {
             for (int length = lengthAwal; length <= retriction; length++) {
                 if (i == 0 || length == lengthAwal) {
-                    bestSolution[i][length] = 0;
+                    bestSolution[i][length] = 0.0;
                 } else if (lengthMsg.get(i - 1) <= length) {
                     bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
                             utilityMsg.get(i - 1) + bestSolution[i - 1][length - lengthMsg.get(i - 1)]);
@@ -975,7 +975,7 @@ public class RapidRouterTest extends ActiveRouter {
         int jumlahMsg = 0;
         int retriction = 0;
         jumlahMsg = tempMsgDrop.size();
-        retriction = getHost().getRouter().getBufferSize() - size;
+        retriction = size;
 
         double[][] bestSolution = new double[jumlahMsg + 1][retriction + 1];
 
@@ -994,11 +994,15 @@ public class RapidRouterTest extends ActiveRouter {
         int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
             if (bestSolution[j][temp] > bestSolution[j - 1][temp]) {
-//                tempMsgTerpilih.add(tempMsg.get(j - 1));
-                temp = temp - lengthMsgDrop.get(j - 1);
-            } else {
                 tempMsgLowersUtil.add(tempMsgDrop.get(j - 1));
+                temp = temp - lengthMsgDrop.get(j - 1);
             }
+            if (temp == 0) {
+                break;
+            }
+//            else {
+//                tempMsgLowersUtil.add(tempMsgDrop.get(j - 1));
+//            }
         }
 //        System.out.println(tempMsgTerpilih);
 //        System.out.println("hapus "+tempMsgLowersUtil);
@@ -1008,30 +1012,30 @@ public class RapidRouterTest extends ActiveRouter {
         for (Message m : tempMsgLowersUtil) {
 //            if(!isSending(m.getId())){
             if (this.hasMessage(m.getId()) && !isSending(m.getId())) {
-//                System.out.println("hapus pesan " + m.getId());
+                System.out.println("hapus pesan " + m.getId());
                 deleteMessage(m.getId(), true);
 //                tempMsgLowersUtil.remove();
             }
         }
     }
 
-    @Override
-    protected boolean makeRoomForMessage(int size) {
-        if (size > this.getBufferSize()) {
-            return false; // message too big for the buffer
-        }
-
-        int freeBuffer = this.getFreeBufferSize();
-        /* delete messages from the buffer until there's enough space */
-        if (freeBuffer < size) {
-//            DTNHost otherHost = getOtherHost;
-            getUtilityMsgToArrForDrop(getHost(), getOtherHost);
-            knapsackDrop(size);
-            dropMSg();
-        }
-
-        return true;
-    }
+//    @Override
+//    protected boolean makeRoomForMessage(int size) {
+//        if (size > this.getBufferSize()) {
+//            return false; // message too big for the buffer
+//        }
+//
+//        int freeBuffer = this.getFreeBufferSize();
+//        /* delete messages from the buffer until there's enough space */
+//        if (freeBuffer < size) {
+////            DTNHost otherHost = getOtherHost;
+//            getUtilityMsgToArrForDrop(getHost(), getOtherHost);
+//            knapsackDrop(size);
+//            dropMSg();
+//        }
+//
+//        return true;
+//    }
 
 //    public DTNHost getOtherHostt(){
 //        return this.getOtherHost;
