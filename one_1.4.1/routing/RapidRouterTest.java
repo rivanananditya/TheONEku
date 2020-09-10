@@ -1039,8 +1039,9 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
                 if(m.equals(msg)){
 //                    System.out.println("pesan baru ga diterima");
 //                    freeBuffer += msg.getSize();
-                    this.tempMsgLowersUtil.remove(msg);
+//                    this.tempMsgLowersUtil.remove(msg);
 //                    return false;
+                    continue;
                 }
 //                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
                 else{
