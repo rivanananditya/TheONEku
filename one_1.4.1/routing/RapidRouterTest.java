@@ -124,7 +124,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
             RapidRouterTest otherRouter = (RapidRouterTest) otherHost.getRouter();
             this.getOtherHost = null;
             this.getOtherHost = otherHost;
-            System.out.println(getHost() + " con " + otherHost);
+//            System.out.println(getHost() + " con " + otherHost);
             this.startTimestamps.put(otherHost, SimClock.getTime());
             /* new connection */
             //simulate control channel on connection up without sending any data
@@ -143,7 +143,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
             this.delayTable.dummyUpdateConnection(con);
 
             cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
-            System.out.println("meeting time "+this.getAvgDurations(otherHost));
+//            System.out.println("meeting time "+this.getAvgDurations(otherHost));
         } else {
             /* connection went down */
             //update connection
@@ -883,7 +883,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 
     public boolean getSyaratKnapsack(DTNHost thisHost, DTNHost otherHost) {
         int retriction = getRetrictionForSend(thisHost, otherHost);
-        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize()) / 8);
+        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize()));
         return isiBuffer > retriction;
     }
 
@@ -905,7 +905,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-            this.lengthMsg.add(m.getSize() / 8); //in byte
+            this.lengthMsg.add(m.getSize()); //in byte
             this.utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsg);
@@ -915,7 +915,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     public void getUtilityMsgToArrForDrop(LinkedList<Message> msg, DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : msg) {
-            this.lengthMsgDrop.add(m.getSize()); //in bit
+            this.lengthMsgDrop.add(m.getSize()); 
             this.utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsgDrop);
@@ -958,7 +958,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
             }
         }
 //        bestSolutionSend=null;
-        System.out.println("pesan terpilih" + tempMsgTerpilih);
+//        System.out.println("pesan terpilih" + tempMsgTerpilih);
 //        this.tempMsg.clear();
 //        this.utilityMsg.clear();
 //        this.lengthMsg.clear();
@@ -1010,8 +1010,8 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 //        System.out.println("pesan di buffer" + tempMsgDrop);
 //        System.out.println(utilityMsgDrop);
 //        System.out.println(lengthMsgDrop);
-        System.out.println("Pesan Baru " + m.getId());
-        System.out.println(this.tempMsgLowersUtil);
+//        System.out.println("Pesan Baru " + m.getId());
+//        System.out.println(this.tempMsgLowersUtil);
     }
 
     @Override
@@ -1024,7 +1024,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 //        int tempSize = 0;
 
         /* delete messages from the buffer until there's enough space */
-        while(freeBuffer < m.getSize()) {
+        if(freeBuffer < m.getSize()) {
 //            System.out.println("size " + size);
 //            System.out.println("freeBUffer " + freeBuffer);
 //            getUtilityMsgToArrForDrop(getHost(), getOtherHostt());
@@ -1036,18 +1036,18 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
                 return false;
             }
             for (Message msg : this.tempMsgLowersUtil) {
-                if(msg == m){
-                    System.out.println("pesan baru ga diterima");
-                    freeBuffer += msg.getSize();
+                if(m.equals(msg)){
+//                    System.out.println("pesan baru ga diterima");
+//                    freeBuffer += msg.getSize();
                     this.tempMsgLowersUtil.remove(msg);
 //                    return false;
                 }
 //                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
-//                l{
-                    System.out.println("hapus pesan " + msg.getId());
+                else{
+//                    System.out.println("hapus pesan " + msg.getId());
                     deleteMessage(msg.getId(), true);
-                    freeBuffer += msg.getSize();
-//                }
+//                    freeBuffer += msg.getSize();
+                }
             }
             this.tempMsgDrop.clear();
             this.utilityMsgDrop.clear();
