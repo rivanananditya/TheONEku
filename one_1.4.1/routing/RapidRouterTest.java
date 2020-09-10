@@ -184,7 +184,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 //            this.utilityMsgDrop.clear();
             this.tempMsg.clear();
 //            this.tempMsgDrop.clear();
-//            this.tempMsgTerpilih.clear();
+            this.tempMsgTerpilih.clear();
 //            this.tempMsgLowersUtil.clear();
 //            this.getOtherHost = null;
         }
@@ -746,14 +746,14 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 
                 mu = getMarginalUtility(m, other, getHost());
 
-                if ((mu) <= 0) {
-                    continue; // skip messages with a marginal utility smaller or equals to 0.
-                }
+//                if ((mu) <= 0) {
+//                    continue; // skip messages with a marginal utility smaller or equals to 0.
+//                }
                 Tuple<Message, Connection> t1 = new Tuple<Message, Connection>(m, con);
                 Tuple<Tuple<Message, Connection>, Double> t2 = new Tuple<Tuple<Message, Connection>, Double>(t1, mu);
                 messages.add(t2);
             }
-            this.tempMsgTerpilih.clear();
+//            this.tempMsgTerpilih.clear();
         }
         this.delayTable.setChanged(false);
         if (messages == null) {
@@ -932,8 +932,8 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
         double[][] bestSolutionSend = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = this.lengthAwal / 8; length <= retriction; length++) {
-                if (i == 0 || length == this.lengthAwal / 8) {
+            for (int length = this.lengthAwal; length <= retriction; length++) {
+                if (i == 0 || length == this.lengthAwal) {
                     bestSolutionSend[i][length] = 0;
                 } else if (this.lengthMsg.get(i - 1) <= length) {
                     bestSolutionSend[i][length] = Math.max(bestSolutionSend[i - 1][length],
@@ -945,10 +945,10 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
         }
         int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
-            if (otherRouter.hasMessage(this.tempMsg.get(j - 1).getId())) {
-//                    System.out.println("pesan sudah di peer");
-                continue; // skip messages that the other one already has
-            }
+//            if (otherRouter.hasMessage(this.tempMsg.get(j - 1).getId())) {
+////                    System.out.println("pesan sudah di peer");
+//                continue; // skip messages that the other one already has
+//            }
             if (bestSolutionSend[j][temp] > bestSolutionSend[j - 1][temp]) {
                 this.tempMsgTerpilih.add(this.tempMsg.get(j - 1));
                 temp = temp - this.lengthMsg.get(j - 1);
@@ -1046,7 +1046,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 //                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
                 else{
 //                    System.out.println("hapus pesan " + msg.getId());
-                    deleteMessage(msg.getId(), true);
+//                    deleteMessage(msg.getId(), true);
 //                    freeBuffer += msg.getSize();
                 }
             }
