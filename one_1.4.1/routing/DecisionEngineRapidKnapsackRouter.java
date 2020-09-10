@@ -149,7 +149,7 @@ public class DecisionEngineRapidKnapsackRouter extends ActiveRouterForKnapsack {
         if (decider.newMessage(m)) {
             //if(m.getId().equals("M7"))
             //System.out.println("Host: " + getHost() + " Creating M7");
-            makeRoomForNewMessage(m.getSize());
+            makeRoomForNewMessage(m);
             //revised by Matthew
             m.setTtl(this.msgTtl);
 

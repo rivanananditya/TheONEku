@@ -35,7 +35,7 @@ public class RapidRouter extends ActiveRouter {
     // minimizing maximum delay)
     private Map<Integer, DTNHost> hostMapping;
 
-    private final UtilityAlgorithm ALGORITHM = UtilityAlgorithm.MISSED_DEADLINES;
+    private final UtilityAlgorithm ALGORITHM = UtilityAlgorithm.AVERAGE_DELAY;
     private static final double INFINITY = 99999;
 
     // interval to verify ongoing connections in seconds

@@ -30,7 +30,7 @@ import routing.community.Duration;
 /**
  * RAPID router
  */
-public class RapidRouterTest extends ActiveRouter {
+public class RapidRouterTest extends ActiveRouterForKnapsack {
     // timestamp for meeting a host in seconds
 
     private double timestamp;
@@ -58,7 +58,7 @@ public class RapidRouterTest extends ActiveRouter {
     private DTNHost getOtherHost;
     //1000
     //500000
-    private static final int lengthAwal = 100000 - 1;
+    private static final int lengthAwal = 100000;
 
     /**
      * Constructor. Creates a new message router based on the settings in the
@@ -119,14 +119,16 @@ public class RapidRouterTest extends ActiveRouter {
     @Override
     public void changedConnection(Connection con) {
         if (con.isUp()) {
-            
+
             DTNHost otherHost = con.getOtherNode(getHost());
+            RapidRouterTest otherRouter = (RapidRouterTest) otherHost.getRouter();
+            this.getOtherHost = null;
             this.getOtherHost = otherHost;
-//            System.out.println(getHost() + " con " + otherHost);
+            System.out.println(getHost() + " con " + otherHost);
             this.startTimestamps.put(otherHost, SimClock.getTime());
             /* new connection */
             //simulate control channel on connection up without sending any data
-            timestamp = SimClock.getTime();
+            this.timestamp = SimClock.getTime();
 
             //synchronize all delay table entries
             synchronizeDelayTables(con);
@@ -134,27 +136,23 @@ public class RapidRouterTest extends ActiveRouter {
             //synchronize all meeting time entries 
             synchronizeMeetingTimes(con);
 
-//            updateDelayTableStat(con);
-//            synchronizeAckedMessageIDs(con);
-//            deleteAckedMessages();
+            updateDelayTableStat(con);
+            synchronizeAckedMessageIDs(con);
+            deleteAckedMessages();
+            doHostMapping(con);
+            this.delayTable.dummyUpdateConnection(con);
 
-//            doHostMapping(con);
-
-            delayTable.dummyUpdateConnection(con);
-
-            cekSyaratKnapsackSend(getHost(), otherHost);
-//            getUtilityMsgToArrForDrop(getHost(), otherHost);
-//            getSyaratKnapsackDrop(getHost(), otherHost);
-
+            cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
+            System.out.println("meeting time "+this.getAvgDurations(otherHost));
         } else {
             /* connection went down */
             //update connection
-            double time = SimClock.getTime() - timestamp;
-            delayTable.updateConnection(con, time);
-            
-//            synchronizeAckedMessageIDs(con);
-//            deleteAckedMessages();
-//            updateAckedMessageIds();
+            double time = SimClock.getTime() - this.timestamp;
+            this.delayTable.updateConnection(con, time);
+
+            synchronizeAckedMessageIDs(con);
+            deleteAckedMessages();
+            updateAckedMessageIds();
             synchronizeDelayTables(con);
 
             DTNHost otherHost = con.getOtherNode(getHost());
@@ -181,13 +179,13 @@ public class RapidRouterTest extends ActiveRouter {
             this.startTimestamps.remove(otherHost);
 
             this.lengthMsg.clear();
-            this.lengthMsgDrop.clear();
+//            this.lengthMsgDrop.clear();
             this.utilityMsg.clear();
-            this.utilityMsgDrop.clear();
+//            this.utilityMsgDrop.clear();
             this.tempMsg.clear();
-            this.tempMsgDrop.clear();
-            this.tempMsgTerpilih.clear();
-            this.tempMsgLowersUtil.clear();
+//            this.tempMsgDrop.clear();
+//            this.tempMsgTerpilih.clear();
+//            this.tempMsgLowersUtil.clear();
 //            this.getOtherHost = null;
         }
     }
@@ -213,7 +211,6 @@ public class RapidRouterTest extends ActiveRouter {
 
                 //synchronize acked message ids
 //                synchronizeAckedMessageIDs(con);
-
                 //update set of messages that are known to have reached the destination 
                 deleteAckedMessages();
                 updateAckedMessageIds();
@@ -235,12 +232,10 @@ public class RapidRouterTest extends ActiveRouter {
 
                 //synchronize acked message ids
 //                synchronizeAckedMessageIDs(con);
-
                 deleteAckedMessages();
 
                 //map DTNHost to their address
 //                doHostMapping(con);
-
                 delayTable.dummyUpdateConnection(con);
             }
         }
@@ -252,10 +247,10 @@ public class RapidRouterTest extends ActiveRouter {
         RapidRouterTest otherRouter = ((RapidRouterTest) otherHost.getRouter());
 
         // propagate host <-> address mapping
-        hostMapping.put(host.getAddress(), host);
-        hostMapping.put(otherHost.getAddress(), otherHost);
-        hostMapping.putAll(otherRouter.hostMapping);
-        otherRouter.hostMapping.putAll(hostMapping);
+        this.hostMapping.put(host.getAddress(), host);
+        this.hostMapping.put(otherHost.getAddress(), otherHost);
+        this.hostMapping.putAll(otherRouter.hostMapping);
+        otherRouter.hostMapping.putAll(this.hostMapping);
     }
 
     private void updateDelayTableStat(Connection con) {
@@ -267,7 +262,7 @@ public class RapidRouterTest extends ActiveRouter {
             int to = m.getTo().getAddress();
             MeetingEntry entry = otherRouter.getDelayTable().getMeetingEntry(from, to);
             if (entry != null) {
-                delayTable.getDelayEntryByMessageId(m.getId()).setChanged(true);
+                this.delayTable.getDelayEntryByMessageId(m.getId()).setChanged(true);
             }
         }
     }
@@ -279,9 +274,9 @@ public class RapidRouterTest extends ActiveRouter {
         DelayEntry otherDelayEntry = null;
 
         //synchronize all delay table entries
-        for (Entry<String, DelayEntry> entry1 : delayTable.getDelayEntries()) {
+        for (Entry<String, DelayEntry> entry1 : this.delayTable.getDelayEntries()) {
             Message m = entry1.getValue().getMessage();
-            delayEntry = delayTable.getDelayEntryByMessageId(m.getId());
+            delayEntry = this.delayTable.getDelayEntryByMessageId(m.getId());
             assert (delayEntry != null);
             otherDelayEntry = otherRouter.delayTable.getDelayEntryByMessageId(m.getId());
 
@@ -336,9 +331,9 @@ public class RapidRouterTest extends ActiveRouter {
         MeetingEntry otherMeetingEntry = null;
 
         //synchronize all meeting time entries
-        for (int i = 0; i < delayTable.getMeetingMatrixDimension(); i++) {
-            for (int k = 0; k < delayTable.getMeetingMatrixDimension(); k++) {
-                meetingEntry = delayTable.getMeetingEntry(i, k);
+        for (int i = 0; i < this.delayTable.getMeetingMatrixDimension(); i++) {
+            for (int k = 0; k < this.delayTable.getMeetingMatrixDimension(); k++) {
+                meetingEntry = this.delayTable.getMeetingEntry(i, k);
 
                 if (meetingEntry != null) {
                     otherMeetingEntry = otherRouter.delayTable.getMeetingEntry(i, k);
@@ -364,10 +359,10 @@ public class RapidRouterTest extends ActiveRouter {
         DTNHost otherHost = con.getOtherNode(getHost());
         RapidRouterTest otherRouter = (RapidRouterTest) otherHost.getRouter();
 
-        delayTable.addAllAckedMessageIds(otherRouter.delayTable.getAllAckedMessageIds());
-        otherRouter.delayTable.addAllAckedMessageIds(delayTable.getAllAckedMessageIds());
+        this.delayTable.addAllAckedMessageIds(otherRouter.delayTable.getAllAckedMessageIds());
+        otherRouter.delayTable.addAllAckedMessageIds(this.delayTable.getAllAckedMessageIds());
 
-        assert (delayTable.getAllAckedMessageIds().equals(otherRouter.delayTable.getAllAckedMessageIds()));
+        assert (this.delayTable.getAllAckedMessageIds().equals(otherRouter.delayTable.getAllAckedMessageIds()));
     }
 
     /**
@@ -376,15 +371,15 @@ public class RapidRouterTest extends ActiveRouter {
      * table
      */
     private void deleteAckedMessages() {
-        for (String id : delayTable.getAllAckedMessageIds()) {
-            if (this.hasMessage(id) && !isSending(id)) {
-                //delete messages from the message buffer
-                this.deleteMessage(id, true);
-            }
+        for (String id : this.delayTable.getAllAckedMessageIds()) {
+//            if (this.hasMessage(id) && !isSending(id)) {
+//                //delete messages from the message buffer
+//                this.deleteMessage(id, true);
+//            }
 
             //delete messages from the delay table
-            if (delayTable.getDelayEntryByMessageId(id) != null) {
-                assert (delayTable.removeEntry(id) == true);
+            if (this.delayTable.getDelayEntryByMessageId(id) != null) {
+                assert (this.delayTable.removeEntry(id) == true);
             }
         }
     }
@@ -394,10 +389,9 @@ public class RapidRouterTest extends ActiveRouter {
         Message m = super.messageTransferred(id, from);
 
         /* was this node the final recipient of the message? */
-//        if (isDeliveredMessage(m)) {
-//            delayTable.addAckedMessageIds(id);
-//        }
-
+        if (isDeliveredMessage(m)) {
+            this.delayTable.addAckedMessageIds(id);
+        }
         return m;
     }
 
@@ -408,7 +402,7 @@ public class RapidRouterTest extends ActiveRouter {
     private void updateAckedMessageIds() {
         ArrayList<String> removableIds = new ArrayList<String>();
 
-        for (String id : delayTable.getAllAckedMessageIds()) {
+        for (String id : this.delayTable.getAllAckedMessageIds()) {
             Message m = this.getMessage(id);
             if ((m != null) && (m.getTtl() <= 0)) {
                 removableIds.add(id);
@@ -416,7 +410,7 @@ public class RapidRouterTest extends ActiveRouter {
         }
 
         if (removableIds.size() > 0) {
-            delayTable.removeAllAckedMessageIds(removableIds);
+            this.delayTable.removeAllAckedMessageIds(removableIds);
         }
     }
 
@@ -431,11 +425,11 @@ public class RapidRouterTest extends ActiveRouter {
     public void updateDelayTableEntry(Message m, DTNHost host, double delay, double time) {
         DelayEntry delayEntry;
 
-        if ((delayEntry = delayTable.getDelayEntryByMessageId(m.getId())) == null) {
+        if ((delayEntry = this.delayTable.getDelayEntryByMessageId(m.getId())) == null) {
             delayEntry = new DelayEntry(m);
-            delayTable.addEntry(delayEntry);
+            this.delayTable.addEntry(delayEntry);
         }
-        assert ((delayEntry != null) && (delayTable.getDelayEntryByMessageId(m.getId()) != null));
+        assert ((delayEntry != null) && (this.delayTable.getDelayEntryByMessageId(m.getId()) != null));
 
         if (delayEntry.contains(host)) {
             delayEntry.setHostDelay(host, delay, time);
@@ -615,28 +609,28 @@ public class RapidRouterTest extends ActiveRouter {
 
         //if delay table entry for this message doesn't exist or the delay table
         //has changed recompute the delay entry
-        if ((recompute) && ((delayTable.delayHasChanged(msg.getId())) || (delayTable.getDelayEntryByMessageId(msg.getId()).getDelayOf(host) == null) /*|| (delayTable.getEntryByMessageId(msg.getId()).getDelayOf(host) == INFINITY))*/)) {
+        if ((recompute) && ((this.delayTable.delayHasChanged(msg.getId())) || (this.delayTable.getDelayEntryByMessageId(msg.getId()).getDelayOf(host) == null) /*|| (delayTable.getEntryByMessageId(msg.getId()).getDelayOf(host) == INFINITY))*/)) {
             // compute remaining time by using metadata
             remainingTime = computeRemainingTime(msg);
-            packetDelay = Math.min(INFINITY, computePacketDelay(msg, host, remainingTime));
+            packetDelay = Math.min(this.INFINITY, computePacketDelay(msg, host, remainingTime));
 
             //update delay table
             updateDelayTableEntry(msg, host, packetDelay, SimClock.getTime());
         } else {
-            packetDelay = delayTable.getDelayEntryByMessageId(msg.getId()).getDelayOf(host);
+            packetDelay = this.delayTable.getDelayEntryByMessageId(msg.getId()).getDelayOf(host);
         }
 
         return packetDelay;
     }
 
     private double computeRemainingTime(Message msg) {
-        double transferTime = INFINITY;		//MX(i):random variable for corresponding transfer time delay
+        double transferTime = this.INFINITY;		//MX(i):random variable for corresponding transfer time delay
         double remainingTime = 0.0;		//a(i): random variable that determines the	remaining time to deliver message i
 
         remainingTime = computeTransferTime(msg, msg.getTo());
-        if (delayTable.getDelayEntryByMessageId(msg.getId()) != null) {
+        if (this.delayTable.getDelayEntryByMessageId(msg.getId()) != null) {
             //Entry<DTNHost host, Tuple<Double delay, Double lastUpdate>>
-            for (Entry<DTNHost, Tuple<Double, Double>> entry : delayTable.getDelayEntryByMessageId(msg.getId()).getDelays()) {
+            for (Entry<DTNHost, Tuple<Double, Double>> entry : this.delayTable.getDelayEntryByMessageId(msg.getId()).getDelays()) {
                 DTNHost host = entry.getKey();
                 if (host == getHost()) {
                     continue;	// skip
@@ -654,7 +648,7 @@ public class RapidRouterTest extends ActiveRouter {
 //		List<Tuple<Message, Double>> list=new ArrayList<Tuple<Message,Double>>();
         double transferOpportunity = 0;					//B:    expected transfer opportunity in bytes between X and Z
         double packetsSize = 0.0;						//b(i): sum of sizes of packets that precede the actual message
-        double transferTime = INFINITY;					//MX(i):random variable for corresponding transfer time delay
+        double transferTime = this.INFINITY;					//MX(i):random variable for corresponding transfer time delay
         double meetingTime = 0.0;						//MXZ:  random variable that represent the meeting Time between X and Y
 
         // packets are already sorted in decreasing order of receive time
@@ -677,12 +671,12 @@ public class RapidRouterTest extends ActiveRouter {
         }
 
         // compute transfer time  
-        transferOpportunity = delayTable.getAvgTransferOpportunity();	//B in bytes
+        transferOpportunity = this.delayTable.getAvgTransferOpportunity();	//B in bytes
 
-        MeetingEntry entry = delayTable.getIndirectMeetingEntry(this.getHost().getAddress(), host.getAddress());
+        MeetingEntry entry = this.delayTable.getIndirectMeetingEntry(this.getHost().getAddress(), host.getAddress());
         // a meeting entry of null means that these hosts have never met -> set transfer time to maximum
         if (entry == null) {
-            transferTime = INFINITY;		//MX(i)
+            transferTime = this.INFINITY;		//MX(i)
         } else {
             meetingTime = entry.getAvgMeetingTime();	//MXZ
             transferTime = meetingTime * Math.ceil(packetsSize / transferOpportunity);	// MX(i) = MXZ * ceil[b(i) / B]
@@ -745,7 +739,7 @@ public class RapidRouterTest extends ActiveRouter {
             }
 
             double mu = 0.0;
-            for (Message m : tempMsgTerpilih) {
+            for (Message m : this.tempMsgTerpilih) {
                 if (otherRouter.hasMessage(m.getId())) {
                     continue; // skip messages that the other one already has
                 }
@@ -755,13 +749,13 @@ public class RapidRouterTest extends ActiveRouter {
                 if ((mu) <= 0) {
                     continue; // skip messages with a marginal utility smaller or equals to 0.
                 }
-
                 Tuple<Message, Connection> t1 = new Tuple<Message, Connection>(m, con);
                 Tuple<Tuple<Message, Connection>, Double> t2 = new Tuple<Tuple<Message, Connection>, Double>(t1, mu);
                 messages.add(t2);
             }
+            this.tempMsgTerpilih.clear();
         }
-        delayTable.setChanged(false);
+        this.delayTable.setChanged(false);
         if (messages == null) {
             return null;
         }
@@ -798,7 +792,7 @@ public class RapidRouterTest extends ActiveRouter {
     }
 
     public DelayTable getDelayTable() {
-        return delayTable;
+        return this.delayTable;
     }
 
     @Override
@@ -838,11 +832,11 @@ public class RapidRouterTest extends ActiveRouter {
     }
 
     public Map<Integer, DTNHost> getHostMapping() {
-        return hostMapping;
+        return this.hostMapping;
     }
 
     public double getMeetingProb(DTNHost host) {
-        MeetingEntry entry = delayTable.getIndirectMeetingEntry(getHost().getAddress(), host.getAddress());
+        MeetingEntry entry = this.delayTable.getIndirectMeetingEntry(getHost().getAddress(), host.getAddress());
         if (entry != null) {
             double prob = (entry.getAvgMeetingTime() * entry.getWeight()) / SimClock.getTime();
             return prob;
@@ -857,7 +851,9 @@ public class RapidRouterTest extends ActiveRouter {
         while (duration.hasNext()) {
             Duration d = duration.next();
             hasil += (d.end - d.start);
+//            System.out.println("d "+d.end +" d star "+d.start);
         }
+//        System.out.println("list duration "+list);
 //        System.out.println("hasil "+hasil+" dan size "+list.size());
         int avgDuration = (int) (hasil / list.size());
         if (avgDuration == 0) {
@@ -875,11 +871,11 @@ public class RapidRouterTest extends ActiveRouter {
         }
     }
 
-    public void cekSyaratKnapsackSend(DTNHost thisHost, DTNHost otherHost) {
+    public void cekSyaratKnapsackSend(DTNHost thisHost, DTNHost otherHost, RapidRouterTest otherRouter) {
         if (getSyaratKnapsack(thisHost, otherHost)) {
 //            System.out.println("test");
             getUtilityMsgToArrForSend(thisHost, otherHost);
-            knapsackSend(thisHost, otherHost);
+            knapsackSend(thisHost, otherHost, otherRouter);
         } else {
             this.tempMsgTerpilih.addAll(getMessageCollection());
         }
@@ -887,16 +883,10 @@ public class RapidRouterTest extends ActiveRouter {
 
     public boolean getSyaratKnapsack(DTNHost thisHost, DTNHost otherHost) {
         int retriction = getRetrictionForSend(thisHost, otherHost);
-        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize())/8);
+        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize()) / 8);
         return isiBuffer > retriction;
     }
 
-//    public void getSyaratKnapsackDrop(DTNHost thisHost, DTNHost otherHost) {
-//        if (thisHost.getBufferOccupancy() > 90.0) {
-//            getUtilityMsgToArrForDrop(thisHost, otherHost);
-//            knapsackDrop(thisHost);
-//        }
-//    }
     public int getRetrictionForSend(DTNHost thisHost, DTNHost otherHost) {
         int retriction;
         int avgDuration = (int) getAvgDurations(otherHost);
@@ -915,129 +905,159 @@ public class RapidRouterTest extends ActiveRouter {
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-            lengthMsg.add(m.getSize()/8); //in byte
-            utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
+            this.lengthMsg.add(m.getSize() / 8); //in byte
+            this.utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsg);
 //        System.out.println(lengthMsg);
     }
 
-    public void getUtilityMsgToArrForDrop(DTNHost thisHost, DTNHost otherHost) {
+    public void getUtilityMsgToArrForDrop(LinkedList<Message> msg, DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
-        for (Message m : thisHost.getMessageCollection()) {
-            lengthMsgDrop.add(m.getSize()); //in bit
-            utilityMsgDrop.add(-1*getMarginalUtility(m, otherHost, thisHost));
+        for (Message m : msg) {
+            this.lengthMsgDrop.add(m.getSize()); //in bit
+            this.utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
         }
-        System.out.println(utilityMsgDrop);
+//        System.out.println(utilityMsgDrop);
 //        System.out.println(lengthMsg);
     }
 
-    public void knapsackSend(DTNHost thisHost, DTNHost otherHost) {
-        tempMsg.addAll(this.getMessageCollection());
+    public void knapsackSend(DTNHost thisHost, DTNHost otherHost, RapidRouterTest otherRouter) {
+        this.tempMsg.addAll(this.getMessageCollection());
         int jumlahMsg = 0;
         int retriction = 0;
-        jumlahMsg = tempMsg.size();
+        jumlahMsg = this.tempMsg.size();
         retriction = this.getRetrictionForSend(thisHost, otherHost);
 
-        double[][] bestSolution = new double[jumlahMsg + 1][retriction + 1];
+        double[][] bestSolutionSend = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = lengthAwal; length <= retriction; length++) {
-                if (i == 0 || length == lengthAwal) {
-                    bestSolution[i][length] = 0.0;
-                } else if (lengthMsg.get(i - 1) <= length) {
-                    bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
-                            utilityMsg.get(i - 1) + bestSolution[i - 1][length - lengthMsg.get(i - 1)]);
+            for (int length = this.lengthAwal / 8; length <= retriction; length++) {
+                if (i == 0 || length == this.lengthAwal / 8) {
+                    bestSolutionSend[i][length] = 0;
+                } else if (this.lengthMsg.get(i - 1) <= length) {
+                    bestSolutionSend[i][length] = Math.max(bestSolutionSend[i - 1][length],
+                            this.utilityMsg.get(i - 1) + bestSolutionSend[i - 1][length - this.lengthMsg.get(i - 1)]);
                 } else {
-                    bestSolution[i][length] = bestSolution[i - 1][length];
+                    bestSolutionSend[i][length] = bestSolutionSend[i - 1][length];
                 }
             }
         }
         int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
-            if (bestSolution[j][temp] > bestSolution[j - 1][temp]) {
-                tempMsgTerpilih.add(tempMsg.get(j - 1));
-                temp = temp - lengthMsg.get(j - 1);
+            if (otherRouter.hasMessage(this.tempMsg.get(j - 1).getId())) {
+//                    System.out.println("pesan sudah di peer");
+                continue; // skip messages that the other one already has
+            }
+            if (bestSolutionSend[j][temp] > bestSolutionSend[j - 1][temp]) {
+                this.tempMsgTerpilih.add(this.tempMsg.get(j - 1));
+                temp = temp - this.lengthMsg.get(j - 1);
             }
             if (temp == 0) {
                 break;
             }
-//            else{
-//                tempMsgLowersUtil.add(tempMsg.get(j-1));
-//            }
         }
-//        System.out.println(tempMsgTerpilih);
-//        System.out.println("hapus "+tempMsgLowersUtil);
+//        bestSolutionSend=null;
+        System.out.println("pesan terpilih" + tempMsgTerpilih);
+//        this.tempMsg.clear();
+//        this.utilityMsg.clear();
+//        this.lengthMsg.clear();
     }
 
-    public void knapsackDrop(int size) {
-        tempMsgDrop.addAll(this.getMessageCollection());
+    public void knapsackDrop(Message m, boolean excludeMsgBeingSent) {
+        this.tempMsgDrop.addAll(this.getMessageCollection());
+        this.tempMsgDrop.add(m);
+        getUtilityMsgToArrForDrop(tempMsgDrop, getHost(), getOtherHostt());
         int jumlahMsg = 0;
         int retriction = 0;
-        jumlahMsg = tempMsgDrop.size();
-        retriction = size;
+        jumlahMsg = this.tempMsgDrop.size();
+        int bufferSize = getHost().getRouter().getBufferSize();
+        retriction = bufferSize;
 
-        double[][] bestSolution = new double[jumlahMsg + 1][retriction + 1];
+        double[][] bestSolutionDrop = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = lengthAwal; length <= retriction; length++) {
-                if (i == 0 || length == lengthAwal) {
-                    bestSolution[i][length] = 0;
-                } else if (lengthMsgDrop.get(i - 1) <= length) {
-                    bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
-                            utilityMsgDrop.get(i - 1) + bestSolution[i - 1][length - lengthMsgDrop.get(i - 1)]);
+            for (int length = this.lengthAwal; length <= retriction; length++) {
+                if (i == 0 || length == this.lengthAwal) {
+                    bestSolutionDrop[i][length] = 0;
+                } else if (this.lengthMsgDrop.get(i - 1) <= length) {
+                    bestSolutionDrop[i][length] = Math.max(bestSolutionDrop[i - 1][length],
+                            this.utilityMsgDrop.get(i - 1) + bestSolutionDrop[i - 1][length - this.lengthMsgDrop.get(i - 1)]);
                 } else {
-                    bestSolution[i][length] = bestSolution[i - 1][length];
+                    bestSolutionDrop[i][length] = bestSolutionDrop[i - 1][length];
                 }
             }
         }
         int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
-            if (bestSolution[j][temp] > bestSolution[j - 1][temp]) {
-                tempMsgLowersUtil.add(tempMsgDrop.get(j - 1));
-                temp = temp - lengthMsgDrop.get(j - 1);
-            }
-            if (temp == 0) {
-                break;
-            }
-//            else {
-//                tempMsgLowersUtil.add(tempMsgDrop.get(j - 1));
+//            if (temp == 0) {
+//                break;
 //            }
-        }
-//        System.out.println(tempMsgTerpilih);
-//        System.out.println("hapus "+tempMsgLowersUtil);
-    }
-
-    public void dropMSg() {
-        for (Message m : tempMsgLowersUtil) {
-//            if(!isSending(m.getId())){
-            if (this.hasMessage(m.getId()) && !isSending(m.getId())) {
-                System.out.println("hapus pesan " + m.getId());
-                deleteMessage(m.getId(), true);
-//                tempMsgLowersUtil.remove();
+//            if (excludeMsgBeingSent && isSending(this.tempMsgDrop.get(j - 1).getId())) {
+//                continue; // skip the message(s) that router is sending
+//            }
+            if (bestSolutionDrop[j][temp] > bestSolutionDrop[j - 1][temp]) {
+//                if (this.hasMessage(tempMsgDrop.get(j - 1).getId()) && !isSending(tempMsgDrop.get(j - 1).getId())) {
+//                this.tempMsgLowersUtil.add(this.tempMsgDrop.get(j - 1));
+//                    deleteMessage(tempMsgDrop.get(j - 1).getId(), true);
+                temp = temp - this.lengthMsgDrop.get(j - 1);
+//                }
+            } else {
+                this.tempMsgLowersUtil.add(this.tempMsgDrop.get(j - 1));
             }
+
         }
+//        System.out.println("pesan di buffer" + tempMsgDrop);
+//        System.out.println(utilityMsgDrop);
+//        System.out.println(lengthMsgDrop);
+        System.out.println("Pesan Baru " + m.getId());
+        System.out.println(this.tempMsgLowersUtil);
     }
 
-//    @Override
-//    protected boolean makeRoomForMessage(int size) {
-//        if (size > this.getBufferSize()) {
-//            return false; // message too big for the buffer
-//        }
-//
-//        int freeBuffer = this.getFreeBufferSize();
-//        /* delete messages from the buffer until there's enough space */
-//        if (freeBuffer < size) {
-////            DTNHost otherHost = getOtherHost;
-//            getUtilityMsgToArrForDrop(getHost(), getOtherHost);
-//            knapsackDrop(size);
-//            dropMSg();
-//        }
-//
-//        return true;
-//    }
+    @Override
+    protected boolean makeRoomForMessage(Message m) {
+        if (m.getSize() > this.getBufferSize()) {
+            return false; // message too big for the buffer
+        }
 
-//    public DTNHost getOtherHostt(){
-//        return this.getOtherHost;
-//    }
+        int freeBuffer = this.getFreeBufferSize();
+//        int tempSize = 0;
+
+        /* delete messages from the buffer until there's enough space */
+        while(freeBuffer < m.getSize()) {
+//            System.out.println("size " + size);
+//            System.out.println("freeBUffer " + freeBuffer);
+//            getUtilityMsgToArrForDrop(getHost(), getOtherHostt());
+            knapsackDrop(m, true);
+
+//            dropMSg();
+            if (this.tempMsgLowersUtil == null) {
+//                System.out.println("NULL");
+                return false;
+            }
+            for (Message msg : this.tempMsgLowersUtil) {
+                if(msg == m){
+                    System.out.println("pesan baru ga diterima");
+                    freeBuffer += msg.getSize();
+                    this.tempMsgLowersUtil.remove(msg);
+//                    return false;
+                }
+//                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
+//                l{
+                    System.out.println("hapus pesan " + msg.getId());
+                    deleteMessage(msg.getId(), true);
+                    freeBuffer += msg.getSize();
+//                }
+            }
+            this.tempMsgDrop.clear();
+            this.utilityMsgDrop.clear();
+            this.lengthMsgDrop.clear();
+            this.tempMsgLowersUtil.clear();
+        }
+        return true;
+    }
+
+    public DTNHost getOtherHostt() {
+        return this.getOtherHost;
+    }
 }

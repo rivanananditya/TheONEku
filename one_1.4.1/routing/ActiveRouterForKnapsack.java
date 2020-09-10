@@ -133,7 +133,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
 
     @Override
     public boolean createNewMessage(Message m) {
-        makeRoomForNewMessage(m.getSize());
+        makeRoomForNewMessage(m);
         return super.createNewMessage(m);
     }
 
@@ -249,10 +249,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
         }
 
         /* remove oldest messages but not the ones being sent */
-//        if (!makeRoomForMessage(m.getSize())) {
-//            return DENIED_NO_SPACE; // couldn't fit into buffer -> reject
-//        }
-        if (!makeRoomForMsgUseKnapsack(m.getSize())) {
+        if (!makeRoomForMessage(m)) {
             return DENIED_NO_SPACE; // couldn't fit into buffer -> reject
         }
 
@@ -267,6 +264,27 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
      * before message is removed
      * @return True if enough space could be freed, false if not
      */
+    protected boolean makeRoomForMessage(Message m) {
+        if (m.getSize() > this.getBufferSize()) {
+            return false; // message too big for the buffer
+        }
+
+        int freeBuffer = this.getFreeBufferSize();
+        /* delete messages from the buffer until there's enough space */
+        while (freeBuffer < m.getSize()) {
+            Message msg = getOldestMessage(true); // don't remove msgs being sent
+
+            if (msg == null) {
+                return false; // couldn't remove any more messages
+            }
+
+            /* delete message from the buffer as "drop" */
+            deleteMessage(msg.getId(), true);
+            freeBuffer += msg.getSize();
+        }
+
+        return true;
+    }
     protected boolean makeRoomForMessage(int size) {
         if (size > this.getBufferSize()) {
             return false; // message too big for the buffer
@@ -287,77 +305,6 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
         }
 
         return true;
-    }
-
-    protected boolean makeRoomForMsgUseKnapsack(int size) {
-        if (size > this.getBufferSize()) {
-            return false; // message too big for the buffer
-        }
-
-        int freeBuffer = this.getFreeBufferSize();
-        if (freeBuffer < size) {
-//            getUtilSizeMsg();
-            LinkedList<Message> m = knapsackDrop(size);
-            if (m != null) {
-                for (int i = 0; i < m.size(); i++) {
-                    if (isSending(m.get(i).getId())) {
-                        continue;
-                    }
-//                    System.out.println("pesan di drop "+m.get(i).getId());
-                    deleteMessage(m.get(i).getId(), true);
-                }
-
-                getLowestUtilMsg.clear();
-//                System.out.println(getLowestUtilMsg);
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public LinkedList<Message> knapsackDrop(int size) {
-        getUtilSizeMsg();
-        tempMsg.addAll(this.getMessageCollection());
-        int jumlahMsg = 0;
-        int restriction = 0;
-        jumlahMsg = tempMsg.size();
-        restriction = (this.getBufferSize() - this.getFreeBufferSize()) - size;
-        double bestSolution[][] = null;
-        bestSolution = new double[jumlahMsg + 1][restriction + 1];
-        //999
-        //499999
-        for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = lengthAwal; length <= restriction; length++) {
-                if (i == 0 || length == lengthAwal) {
-                    bestSolution[i][length] = 0;
-                } else if (lengthMsg.get(i - 1) <= length) {
-                    bestSolution[i][length] = Math.max(bestSolution[i - 1][length],
-                            utilityMsg.get(i - 1) + bestSolution[i - 1][length - lengthMsg.get(i - 1)]);
-                } else {
-                    bestSolution[i][length] = bestSolution[i - 1][length];
-                }
-            }
-        }
-
-        for (int j = jumlahMsg; j >= 1; j--) {
-            if (bestSolution[j][restriction] > bestSolution[j - 1][restriction]) {
-                restriction = restriction - lengthMsg.get(j - 1);
-            } else {
-                getLowestUtilMsg.add(tempMsg.get(j - 1));
-            }
-        }
-        this.tempMsg.clear();
-        this.lengthMsg.clear();
-        this.utilityMsg.clear();
-        return getLowestUtilMsg;
-    }
-
-    public void getUtilSizeMsg() {
-        for (Message m : this.getMessageCollection()) {
-            lengthMsg.add(m.getSize());
-            utilityMsg.add((Double) m.getProperty(UTILITY));
-        }
     }
 
     /**
@@ -381,9 +328,9 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
      *
      * @param size Size of the new message
      */
-    protected void makeRoomForNewMessage(int size) {
-//        makeRoomForMessage(size);
-        makeRoomForMsgUseKnapsack(size);
+    protected void makeRoomForNewMessage(Message m) {
+        makeRoomForMessage(m);
+//        makeRoomForMessage(m.getSize());
     }
 
     /**
@@ -680,8 +627,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
             if (removeCurrent) {
                 // if the message being sent was holding excess buffer, free it
                 if (this.getFreeBufferSize() < 0) {
-//                    this.makeRoomForMessage(0);
-                    this.makeRoomForMsgUseKnapsack(0);
+                    this.makeRoomForMessage(0);
                 }
                 sendingConnections.remove(i);
             } else {

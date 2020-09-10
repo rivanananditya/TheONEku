@@ -3,7 +3,7 @@
 #
 
 ## Scenario settings
-#Scenario.name = scenario_TJ_fix_4_23M_Bus_3M_SensorL_3M_SensorM_256k_SizeL_1Hrs_M_5Hrs_L
+#Scenario.name = scenario_TJ_fix_4_25M_Bus_5M_SensorL_5M_SensorM_256k_SizeL_1Hrs_M_5Hrs_L
 Scenario.name = scenario-TJ-%%Group.router%%-AVERAGE_DELAY
 #Scenario.name = scenario-TJ-%%Group.router%%-MISSED_DEADLINES
 #Scenario.name = scenario-TJ-%%Group.router%%-MAXIMUM_DELAY
@@ -76,7 +76,7 @@ Group.router = RapidRouterTest
 
 #Group.sendQueue = 3
 
-Group.bufferSize = 23M
+Group.bufferSize = 20M
 Group.waitTime = 0, 0
 Group.nrofInterfaces = 3
 Group.interface1 = w802-11pInterface
@@ -128,7 +128,7 @@ Group4.interface1 = w802-11pInterface
 
 #Group of Sensor - 38 nodes
 Group5.groupID = s
-Group5.bufferSize = 3M
+Group5.bufferSize = 5M
 Group5.movementModel = StationaryMovement
 Group5.nodeLocation = 1900,3698
 Group5.nrofHosts = 1
@@ -136,7 +136,7 @@ Group5.nrofInterfaces = 1
 Group5.interface1 = w802-11bInterface
 
 Group6.groupID = s
-Group6.bufferSize = 3M
+Group6.bufferSize = 5M
 Group6.movementModel = StationaryMovement
 Group6.nodeLocation = 1175,6305
 Group6.nrofHosts = 1
@@ -144,7 +144,7 @@ Group6.nrofInterfaces = 1
 Group6.interface1 = w802-11bInterface
 
 Group7.groupID = s
-Group7.bufferSize = 3M
+Group7.bufferSize = 5M
 Group7.movementModel = StationaryMovement
 Group7.nodeLocation = 1510,8715
 Group7.nrofHosts = 1
@@ -152,7 +152,7 @@ Group7.nrofInterfaces = 1
 Group7.interface1 = w802-11bInterface
 
 Group8.groupID = s
-Group8.bufferSize = 3M
+Group8.bufferSize = 5M
 Group8.movementModel = StationaryMovement
 Group8.nodeLocation = 5640,10200
 Group8.nrofHosts = 1
@@ -160,7 +160,7 @@ Group8.nrofInterfaces = 1
 Group8.interface1 = w802-11bInterface
 
 Group9.groupID = s
-Group9.bufferSize = 3M
+Group9.bufferSize = 5M
 Group9.movementModel = StationaryMovement
 Group9.nodeLocation = 5955,7887
 Group9.nrofHosts = 1
@@ -168,7 +168,7 @@ Group9.nrofInterfaces = 1
 Group9.interface1 = w802-11bInterface
 
 Group10.groupID = s
-Group10.bufferSize = 3M
+Group10.bufferSize = 5M
 Group10.movementModel = StationaryMovement
 Group10.nodeLocation = 6799,7995
 Group10.nrofHosts = 1
@@ -176,7 +176,7 @@ Group10.nrofInterfaces = 1
 Group10.interface1 = w802-11bInterface
 
 Group11.groupID = s
-Group11.bufferSize = 3M
+Group11.bufferSize = 5M
 Group11.movementModel = StationaryMovement
 Group11.nodeLocation = 7635,8125
 Group11.nrofHosts = 1
@@ -184,7 +184,7 @@ Group11.nrofInterfaces = 1
 Group11.interface1 = w802-11bInterface
 
 Group12.groupID = s
-Group12.bufferSize = 3M
+Group12.bufferSize = 5M
 Group12.movementModel = StationaryMovement
 Group12.nodeLocation = 8483,10278
 Group12.nrofHosts = 1
@@ -192,7 +192,7 @@ Group12.nrofInterfaces = 1
 Group12.interface1 = w802-11bInterface
 
 Group13.groupID = s
-Group13.bufferSize = 3M
+Group13.bufferSize = 5M
 Group13.movementModel = StationaryMovement
 Group13.nodeLocation = 5541,6400
 Group13.nrofHosts = 1
@@ -200,7 +200,7 @@ Group13.nrofInterfaces = 1
 Group13.interface1 = w802-11bInterface
 
 Group14.groupID = s
-Group14.bufferSize = 3M
+Group14.bufferSize = 5M
 Group14.movementModel = StationaryMovement
 Group14.nodeLocation = 8897,6490
 Group14.nrofHosts = 1
@@ -208,7 +208,7 @@ Group14.nrofInterfaces = 1
 Group14.interface1 = w802-11bInterface
 
 Group15.groupID = s
-Group15.bufferSize = 3M
+Group15.bufferSize = 5M
 Group15.movementModel = StationaryMovement
 Group15.nodeLocation = 10505,6092
 Group15.nrofHosts = 1
@@ -216,7 +216,7 @@ Group15.nrofInterfaces = 1
 Group15.interface1 = w802-11bInterface
 
 Group16.groupID = s
-Group16.bufferSize = 3M
+Group16.bufferSize = 5M
 Group16.movementModel = StationaryMovement
 Group16.nodeLocation = 10420,7578
 Group16.nrofHosts = 1
@@ -224,7 +224,7 @@ Group16.nrofInterfaces = 1
 Group16.interface1 = w802-11bInterface
 
 Group17.groupID = s
-Group17.bufferSize = 3M
+Group17.bufferSize = 5M
 Group17.movementModel = StationaryMovement
 Group17.nodeLocation = 10557,4397
 Group17.nrofHosts = 1
@@ -232,7 +232,7 @@ Group17.nrofInterfaces = 1
 Group17.interface1 = w802-11bInterface
 
 Group18.groupID = s
-Group18.bufferSize = 3M
+Group18.bufferSize = 5M
 Group18.movementModel = StationaryMovement
 Group18.nodeLocation = 7060,4835
 Group18.nrofHosts = 1
@@ -240,7 +240,7 @@ Group18.nrofInterfaces = 1
 Group18.interface1 = w802-11bInterface
 
 Group19.groupID = s
-Group19.bufferSize = 3M
+Group19.bufferSize = 5M
 Group19.movementModel = StationaryMovement
 Group19.nodeLocation = 5800,4350
 Group19.nrofHosts = 1
@@ -248,7 +248,7 @@ Group19.nrofInterfaces = 1
 Group19.interface1 = w802-11bInterface
 
 Group20.groupID = s
-Group20.bufferSize = 3M
+Group20.bufferSize = 5M
 Group20.movementModel = StationaryMovement
 Group20.nodeLocation = 6655,4357
 Group20.nrofHosts = 1
@@ -256,7 +256,7 @@ Group20.nrofInterfaces = 1
 Group20.interface1 = w802-11bInterface
 
 Group21.groupID = s
-Group21.bufferSize = 3M
+Group21.bufferSize = 5M
 Group21.movementModel = StationaryMovement
 Group21.nodeLocation = 8075,4370
 Group21.nrofHosts = 1
@@ -264,7 +264,7 @@ Group21.nrofInterfaces = 1
 Group21.interface1 = w802-11bInterface
 
 Group22.groupID = s
-Group22.bufferSize = 3M
+Group22.bufferSize = 5M
 Group22.movementModel = StationaryMovement
 Group22.nodeLocation = 8170,3785
 Group22.nrofHosts = 1
@@ -272,7 +272,7 @@ Group22.nrofInterfaces = 1
 Group22.interface1 = w802-11bInterface
 
 Group23.groupID = s
-Group23.bufferSize = 3M
+Group23.bufferSize = 5M
 Group23.movementModel = StationaryMovement
 Group23.nodeLocation = 6047,2025
 Group23.nrofHosts = 1
@@ -280,7 +280,7 @@ Group23.nrofInterfaces = 1
 Group23.interface1 = w802-11bInterface
 
 Group24.groupID = s
-Group24.bufferSize = 3M
+Group24.bufferSize = 5M
 Group24.movementModel = StationaryMovement
 Group24.nodeLocation = 7056,2445
 Group24.nrofHosts = 1
@@ -288,7 +288,7 @@ Group24.nrofInterfaces = 1
 Group24.interface1 = w802-11bInterface
 
 Group25.groupID = s
-Group25.bufferSize = 3M
+Group25.bufferSize = 5M
 Group25.movementModel = StationaryMovement
 Group25.nodeLocation = 7585,1230
 Group25.nrofHosts = 1
@@ -296,7 +296,7 @@ Group25.nrofInterfaces = 1
 Group25.interface1 = w802-11bInterface
 
 Group26.groupID = s
-Group26.bufferSize = 3M
+Group26.bufferSize = 5M
 Group26.movementModel = StationaryMovement
 Group26.nodeLocation = 8947,1620
 Group26.nrofHosts = 1
@@ -304,7 +304,7 @@ Group26.nrofInterfaces = 1
 Group26.interface1 = w802-11bInterface
 
 Group27.groupID = s
-Group27.bufferSize = 3M
+Group27.bufferSize = 5M
 Group27.movementModel = StationaryMovement
 Group27.nodeLocation = 10737,1995
 Group27.nrofHosts = 1
@@ -312,7 +312,7 @@ Group27.nrofInterfaces = 1
 Group27.interface1 = w802-11bInterface
 
 Group28.groupID = s
-Group28.bufferSize = 3M
+Group28.bufferSize = 5M
 Group28.movementModel = StationaryMovement
 Group28.nodeLocation = 12703,4403
 Group28.nrofHosts = 1
@@ -320,7 +320,7 @@ Group28.nrofInterfaces = 1
 Group28.interface1 = w802-11bInterface
 
 Group29.groupID = s
-Group29.bufferSize = 3M
+Group29.bufferSize = 5M
 Group29.movementModel = StationaryMovement
 Group29.nodeLocation = 18580,1420
 Group29.nrofHosts = 1
@@ -328,7 +328,7 @@ Group29.nrofInterfaces = 1
 Group29.interface1 = w802-11bInterface
 
 Group30.groupID = s
-Group30.bufferSize = 3M
+Group30.bufferSize = 5M
 Group30.movementModel = StationaryMovement
 Group30.nodeLocation = 4370,9330
 Group30.nrofHosts = 1
@@ -336,7 +336,7 @@ Group30.nrofInterfaces = 1
 Group30.interface1 = w802-11bInterface
 
 Group31.groupID = s
-Group31.bufferSize = 3M
+Group31.bufferSize = 5M
 Group31.movementModel = StationaryMovement
 Group31.nodeLocation = 9670,6510
 Group31.nrofHosts = 1
@@ -344,7 +344,7 @@ Group31.nrofInterfaces = 1
 Group31.interface1 = w802-11bInterface
 
 Group32.groupID = s
-Group32.bufferSize = 3M
+Group32.bufferSize = 5M
 Group32.movementModel = StationaryMovement
 Group32.nodeLocation = 6240,820
 Group32.nrofHosts = 1
@@ -352,7 +352,7 @@ Group32.nrofInterfaces = 1
 Group32.interface1 = w802-11bInterface
 
 Group33.groupID = s
-Group33.bufferSize = 3M
+Group33.bufferSize = 5M
 Group33.movementModel = StationaryMovement
 Group33.nodeLocation = 7870,3785
 Group33.nrofHosts = 1
@@ -360,7 +360,7 @@ Group33.nrofInterfaces = 1
 Group33.interface1 = w802-11bInterface
 
 Group34.groupID = s
-Group34.bufferSize = 3M
+Group34.bufferSize = 5M
 Group34.movementModel = StationaryMovement
 Group34.nodeLocation = 6030,6420
 Group34.nrofHosts = 1
@@ -368,7 +368,7 @@ Group34.nrofInterfaces = 1
 Group34.interface1 = w802-11bInterface
 
 Group35.groupID = s
-Group35.bufferSize = 3M
+Group35.bufferSize = 5M
 Group35.movementModel = StationaryMovement
 Group35.nodeLocation = 4615,6375
 Group35.nrofHosts = 1
@@ -376,7 +376,7 @@ Group35.nrofInterfaces = 1
 Group35.interface1 = w802-11bInterface
 
 Group36.groupID = s
-Group36.bufferSize = 3M
+Group36.bufferSize = 5M
 Group36.movementModel = StationaryMovement
 Group36.nodeLocation = 1660,6235
 Group36.nrofHosts = 1
@@ -384,7 +384,7 @@ Group36.nrofInterfaces = 1
 Group36.interface1 = w802-11bInterface
 
 Group37.groupID = s
-Group37.bufferSize = 3M
+Group37.bufferSize = 5M
 Group37.movementModel = StationaryMovement
 Group37.nodeLocation = 2115,6265
 Group37.nrofHosts = 1
@@ -392,7 +392,7 @@ Group37.nrofInterfaces = 1
 Group37.interface1 = w802-11bInterface
 
 Group38.groupID = s
-Group38.bufferSize = 3M
+Group38.bufferSize = 5M
 Group38.movementModel = StationaryMovement
 Group38.nodeLocation = 5850,3815
 Group38.nrofHosts = 1
@@ -400,7 +400,7 @@ Group38.nrofInterfaces = 1
 Group38.interface1 = w802-11bInterface
 
 Group39.groupID = s
-Group39.bufferSize = 3M
+Group39.bufferSize = 5M
 Group39.movementModel = StationaryMovement
 Group39.nodeLocation = 5105,4340
 Group39.nrofHosts = 1
@@ -408,7 +408,7 @@ Group39.nrofInterfaces = 1
 Group39.interface1 = w802-11bInterface
 
 Group40.groupID = s
-Group40.bufferSize = 3M
+Group40.bufferSize = 5M
 Group40.movementModel = StationaryMovement
 Group40.nodeLocation = 4205,4213
 Group40.nrofHosts = 1
@@ -416,7 +416,7 @@ Group40.nrofInterfaces = 1
 Group40.interface1 = w802-11bInterface
 
 Group41.groupID = s
-Group41.bufferSize = 3M
+Group41.bufferSize = 5M
 Group41.movementModel = StationaryMovement
 Group41.nodeLocation = 7080,6440
 Group41.nrofHosts = 1
@@ -424,7 +424,7 @@ Group41.nrofInterfaces = 1
 Group41.interface1 = w802-11bInterface
 
 Group42.groupID = s
-Group42.bufferSize = 3M
+Group42.bufferSize = 5M
 Group42.movementModel = StationaryMovement
 Group42.nodeLocation = 6580,10280
 Group42.nrofHosts = 1
@@ -562,7 +562,7 @@ Report.nrofReports = 6
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
 #Report.reportDir = reports/BusTj/testDE/2/
-Report.reportDir = reports/BusTj/testRRA1800baru/transmitrange501525and3MbufferSensor23MbusDropbawaan/
+Report.reportDir = reports/BusTj/testRRA1800baru1/transmitrange501525and5MbufferSensor20Mbus/
 #Report.reportDir = reports/BusTj/testKP1/1/
 #Report.reportDir = reports/BusTj/testEpidemic/1/
 # Report classes to load
