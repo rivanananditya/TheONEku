@@ -918,7 +918,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     public void getUtilityMsgToArrForDrop(LinkedList<Message> msg, DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : msg) {
-            this.lengthMsgDrop.add(m.getSize());
+            this.lengthMsgDrop.add(m.getSize()/bytes);
             this.utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsgDrop);
@@ -974,14 +974,14 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
         int jumlahMsg = 0;
         int retriction = 0;
         jumlahMsg = this.tempMsgDrop.size();
-        int bufferSize = getHost().getRouter().getBufferSize();
+        int bufferSize = getHost().getRouter().getBufferSize()/bytes;
         retriction = bufferSize;
 
         double[][] bestSolutionDrop = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = this.lengthAwal; length <= retriction; length++) {
-                if (i == 0 || length == this.lengthAwal) {
+            for (int length = this.lengthAwal/bytes; length <= retriction; length++) {
+                if (i == 0 || length == this.lengthAwal/bytes) {
                     bestSolutionDrop[i][length] = 0;
                 } else if (this.lengthMsgDrop.get(i - 1) <= length) {
                     bestSolutionDrop[i][length] = Math.max(bestSolutionDrop[i - 1][length],
