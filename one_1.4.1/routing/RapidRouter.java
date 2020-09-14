@@ -665,7 +665,10 @@ public class RapidRouter extends ActiveRouter {
         for (Connection con : getConnections()) {
             DTNHost other = con.getOtherNode(getHost());
             RapidRouter otherRouter = (RapidRouter) other.getRouter();
-
+            if (String.valueOf(other.toString().charAt(0)).equals("s")) {
+//                System.out.println("ktemu sensor");
+                continue;
+            }
             if (otherRouter.isTransferring()) {
                 continue; // skip hosts that are transferring
             }

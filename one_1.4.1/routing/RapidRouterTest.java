@@ -142,8 +142,11 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
             deleteAckedMessages();
             doHostMapping(con);
             this.delayTable.dummyUpdateConnection(con);
-
-            cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
+            
+            if (!String.valueOf(otherHost.toString().charAt(0)).equals("s")) {
+                cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
+            }
+//            cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
 //            System.out.println("meeting time "+this.getAvgDurations(otherHost));
         } else {
             /* connection went down */
@@ -906,7 +909,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-            double tempL = m.getSize()/bytes;
+//            double tempL = m.getSize()/bytes;
 //            this.lengthMsg.add(tempL); //in byte
             this.lengthMsg.add(m.getSize()/bytes); //in byte
             this.utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));

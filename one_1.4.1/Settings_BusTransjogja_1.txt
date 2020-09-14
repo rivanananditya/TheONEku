@@ -64,8 +64,9 @@ Scenario.nrofHostGroups = 59
 Group.movementModel = MapRouteMovementWithStop
 #RapidRouterTest
 #EpidemicRouter
+#RapidRouter
 
-Group.router = RapidRouterTest
+Group.router = RapidRouter
 
 Group.bufferSize = 20M
 Group.waitTime = 0, 0
