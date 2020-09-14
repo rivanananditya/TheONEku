@@ -59,6 +59,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     //1000
     //500000
     private static final int lengthAwal = 100000;
+    private static final int bytes = 1000;
 
     /**
      * Constructor. Creates a new message router based on the settings in the
@@ -883,7 +884,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 
     public boolean getSyaratKnapsack(DTNHost thisHost, DTNHost otherHost) {
         int retriction = getRetrictionForSend(thisHost, otherHost);
-        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize()));
+        int isiBuffer = ((thisHost.getRouter().getBufferSize() - thisHost.getRouter().getFreeBufferSize())/bytes);
         return isiBuffer > retriction;
     }
 
@@ -891,7 +892,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
         int retriction;
         int avgDuration = (int) getAvgDurations(otherHost);
 
-        int tfSpeed = getTransferSpeed(thisHost); //in bytes
+        int tfSpeed = getTransferSpeed(thisHost)/bytes; //in bytes
 //        int tfSpeed1 = (int) this.delayTable.getAvgTransferOpportunity();
         retriction = Math.abs(avgDuration * tfSpeed);
 
@@ -905,7 +906,9 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-            this.lengthMsg.add(m.getSize()); //in byte
+            double tempL = m.getSize()/bytes;
+//            this.lengthMsg.add(tempL); //in byte
+            this.lengthMsg.add(m.getSize()/bytes); //in byte
             this.utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsg);
@@ -932,8 +935,8 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
         double[][] bestSolutionSend = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = this.lengthAwal; length <= retriction; length++) {
-                if (i == 0 || length == this.lengthAwal) {
+            for (int length = this.lengthAwal/bytes; length <= retriction; length++) {
+                if (i == 0 || length == this.lengthAwal/bytes) {
                     bestSolutionSend[i][length] = 0;
                 } else if (this.lengthMsg.get(i - 1) <= length) {
                     bestSolutionSend[i][length] = Math.max(bestSolutionSend[i - 1][length],
@@ -1040,7 +1043,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 //                }
                 if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
 //            else {
-                    System.out.println("hapus pesan " + msg.getId());
+//                    System.out.println("hapus pesan "  + msg.getId());
                     deleteMessage(msg.getId(), true);
 //                    freeBuffer += msg.getSize();
                 }
