@@ -746,9 +746,9 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 
                 mu = getMarginalUtility(m, other, getHost());
 
-//                if ((mu) <= 0) {
-//                    continue; // skip messages with a marginal utility smaller or equals to 0.
-//                }
+                if ((mu) <= 0) {
+                    continue; // skip messages with a marginal utility smaller or equals to 0.
+                }
                 Tuple<Message, Connection> t1 = new Tuple<Message, Connection>(m, con);
                 Tuple<Tuple<Message, Connection>, Double> t2 = new Tuple<Tuple<Message, Connection>, Double>(t1, mu);
                 messages.add(t2);
@@ -760,7 +760,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
             return null;
         }
 
-//        Collections.sort(messages, new TupleComparator2());
+        Collections.sort(messages, new TupleComparator2());
         return tryTupleMessagesForConnected(messages);	// try to send messages
 //        return tryMessagesForConnected(messages);	// try to send messages
     }
@@ -915,7 +915,7 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
     public void getUtilityMsgToArrForDrop(LinkedList<Message> msg, DTNHost thisHost, DTNHost otherHost) {
 //        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : msg) {
-            this.lengthMsgDrop.add(m.getSize()); 
+            this.lengthMsgDrop.add(m.getSize());
             this.utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
         }
 //        System.out.println(utilityMsgDrop);
@@ -1024,29 +1024,24 @@ public class RapidRouterTest extends ActiveRouterForKnapsack {
 //        int tempSize = 0;
 
         /* delete messages from the buffer until there's enough space */
-        if(freeBuffer < m.getSize()) {
+        if (freeBuffer < m.getSize()) {
 //            System.out.println("size " + size);
 //            System.out.println("freeBUffer " + freeBuffer);
 //            getUtilityMsgToArrForDrop(getHost(), getOtherHostt());
             knapsackDrop(m, true);
 
-//            dropMSg();
             if (this.tempMsgLowersUtil == null) {
 //                System.out.println("NULL");
                 return false;
             }
             for (Message msg : this.tempMsgLowersUtil) {
-                if(m.equals(msg)){
-//                    System.out.println("pesan baru ga diterima");
-//                    freeBuffer += msg.getSize();
-//                    this.tempMsgLowersUtil.remove(msg);
-//                    return false;
-                    continue;
-                }
-//                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
-                else{
-//                    System.out.println("hapus pesan " + msg.getId());
-//                    deleteMessage(msg.getId(), true);
+//                if (freeBuffer >= m.getSize()) {
+//                    return true;
+//                }
+                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
+//            else {
+                    System.out.println("hapus pesan " + msg.getId());
+                    deleteMessage(msg.getId(), true);
 //                    freeBuffer += msg.getSize();
                 }
             }

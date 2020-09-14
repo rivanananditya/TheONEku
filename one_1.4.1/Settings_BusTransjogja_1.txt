@@ -25,18 +25,18 @@ Scenario.endTime = 64800
 w802-11pInterface.type = SimpleBroadcastInterface
 #250kbps = 38kBps
 #2Mbps = 250kBps
-w802-11pInterface.transmitSpeed = 750k
-w802-11pInterface.transmitRange = 30
+w802-11pInterface.transmitSpeed = 500k
+w802-11pInterface.transmitRange = 50
 
 # interface for 802.15.4 link profile
 w802-11Interface.type = SimpleBroadcastInterface
-w802-11Interface.transmitSpeed = 250k
-w802-11Interface.transmitRange = 10
+w802-11Interface.transmitSpeed = 125k
+w802-11Interface.transmitRange = 15
 
 # interface for 802.11b link profile
 w802-11bInterface.type = SimpleBroadcastInterface
-w802-11bInterface.transmitSpeed = 350k
-w802-11bInterface.transmitRange = 15
+w802-11bInterface.transmitSpeed = 250k
+w802-11bInterface.transmitRange = 25
 
 Scenario.nrofHostGroups = 59
 

@@ -55,14 +55,6 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
      */
     private double lastTtlCheck;
 
-    private static final String UTILITY = "utility";
-    LinkedList<Integer> lengthMsg;
-    LinkedList<Double> utilityMsg;
-    LinkedList<Message> getLowestUtilMsg;
-    LinkedList<Message> tempMsg;
-    //1000
-    //500000
-    private static final int lengthAwal = 1000 - 1;
 
     /**
      * Constructor. Creates a new message router based on the settings in the
@@ -88,11 +80,6 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
     protected ActiveRouterForKnapsack(ActiveRouterForKnapsack r) {
         super(r);
         this.deleteDelivered = r.deleteDelivered;
-
-        lengthMsg = new LinkedList<>();
-        utilityMsg = new LinkedList<>();
-        getLowestUtilMsg = new LinkedList<>();
-        tempMsg = new LinkedList<>();
     }
 
     @Override
