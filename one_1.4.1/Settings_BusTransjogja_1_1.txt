@@ -4,8 +4,8 @@
 
 ## Scenario settings
 #Scenario.name = scenario_TJ_fix_4_23M_Bus_3M_SensorL_3M_SensorM_256k_SizeL_1Hrs_M_5Hrs_L
-Scenario.name = scenario-TJ-%%Group.router%%-AVERAGE_DELAY
-#Scenario.name = scenario-TJ-%%Group.router%%-MISSED_DEADLINES
+#Scenario.name = scenario-TJ-%%Group.router%%-AVERAGE_DELAY
+Scenario.name = scenario-TJ-%%Group.router%%-MISSED_DEADLINES
 #Scenario.name = scenario-TJ-%%Group.router%%-MAXIMUM_DELAY
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
@@ -26,12 +26,12 @@ w802-11pInterface.type = SimpleBroadcastInterface
 #250kbps = 38kBps
 #2Mbps = 250kBps
 w802-11pInterface.transmitSpeed = 750k
-w802-11pInterface.transmitRange = 200
+w802-11pInterface.transmitRange = 50
 
 # interface for 802.11b link profile
 w802-11bInterface.type = SimpleBroadcastInterface
 w802-11bInterface.transmitSpeed = 375k
-w802-11bInterface.transmitRange = 20
+w802-11bInterface.transmitRange = 25
 
 Scenario.nrofHostGroups = 59
 
@@ -63,16 +63,16 @@ Group.movementModel = MapRouteMovementWithStop
 
 Group.router = RapidRouterTest
 
-Group.bufferSize = 40M
+Group.bufferSize = 20M
 Group.waitTime = 0, 0
 Group.nrofInterfaces = 2
 Group.interface1 = w802-11pInterface
 Group.interface2 = w802-11bInterface
 
 # Kecepata Bus Transjogja
-Group.speed = 2.7, 11.1
+Group.speed = 3, 8
 # Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 300
+Group.msgTtl = 60
 Group.stopFile = data/CoordStopPoint.txt
 Group.stopTime = 5, 30
 #Group.stopTime = 60, 120
@@ -113,8 +113,13 @@ Group4.nrofHosts = 1
 Group4.nrofInterfaces = 1
 Group4.interface1 = w802-11pInterface
 
+#Group.router = DecisionEngineRouter
+#DecisionEngineRouter.decisionEngine = SensorRouter
+
 #Group of Sensor - 38 nodes
 Group5.groupID = s
+Group5.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group5.bufferSize = 3M
 Group5.movementModel = StationaryMovement
 Group5.nodeLocation = 1900,3698
@@ -123,6 +128,8 @@ Group5.nrofInterfaces = 1
 Group5.interface1 = w802-11bInterface
 
 Group6.groupID = s
+Group6.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group6.bufferSize = 3M
 Group6.movementModel = StationaryMovement
 Group6.nodeLocation = 1175,6305
@@ -131,6 +138,8 @@ Group6.nrofInterfaces = 1
 Group6.interface1 = w802-11bInterface
 
 Group7.groupID = s
+Group7.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group7.bufferSize = 3M
 Group7.movementModel = StationaryMovement
 Group7.nodeLocation = 1510,8715
@@ -139,6 +148,8 @@ Group7.nrofInterfaces = 1
 Group7.interface1 = w802-11bInterface
 
 Group8.groupID = s
+Group8.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group8.bufferSize = 3M
 Group8.movementModel = StationaryMovement
 Group8.nodeLocation = 5640,10200
@@ -147,6 +158,8 @@ Group8.nrofInterfaces = 1
 Group8.interface1 = w802-11bInterface
 
 Group9.groupID = s
+Group9.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group9.bufferSize = 3M
 Group9.movementModel = StationaryMovement
 Group9.nodeLocation = 5955,7887
@@ -155,6 +168,8 @@ Group9.nrofInterfaces = 1
 Group9.interface1 = w802-11bInterface
 
 Group10.groupID = s
+Group10.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group10.bufferSize = 3M
 Group10.movementModel = StationaryMovement
 Group10.nodeLocation = 6799,7995
@@ -163,6 +178,8 @@ Group10.nrofInterfaces = 1
 Group10.interface1 = w802-11bInterface
 
 Group11.groupID = s
+Group11.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group11.bufferSize = 3M
 Group11.movementModel = StationaryMovement
 Group11.nodeLocation = 7635,8125
@@ -171,6 +188,8 @@ Group11.nrofInterfaces = 1
 Group11.interface1 = w802-11bInterface
 
 Group12.groupID = s
+Group12.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group12.bufferSize = 3M
 Group12.movementModel = StationaryMovement
 Group12.nodeLocation = 8483,10278
@@ -179,6 +198,8 @@ Group12.nrofInterfaces = 1
 Group12.interface1 = w802-11bInterface
 
 Group13.groupID = s
+Group13.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group13.bufferSize = 3M
 Group13.movementModel = StationaryMovement
 Group13.nodeLocation = 5541,6400
@@ -187,6 +208,8 @@ Group13.nrofInterfaces = 1
 Group13.interface1 = w802-11bInterface
 
 Group14.groupID = s
+Group14.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group14.bufferSize = 3M
 Group14.movementModel = StationaryMovement
 Group14.nodeLocation = 8897,6490
@@ -195,6 +218,8 @@ Group14.nrofInterfaces = 1
 Group14.interface1 = w802-11bInterface
 
 Group15.groupID = s
+Group15.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group15.bufferSize = 3M
 Group15.movementModel = StationaryMovement
 Group15.nodeLocation = 10505,6092
@@ -203,6 +228,8 @@ Group15.nrofInterfaces = 1
 Group15.interface1 = w802-11bInterface
 
 Group16.groupID = s
+Group16.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group16.bufferSize = 3M
 Group16.movementModel = StationaryMovement
 Group16.nodeLocation = 10420,7578
@@ -211,6 +238,8 @@ Group16.nrofInterfaces = 1
 Group16.interface1 = w802-11bInterface
 
 Group17.groupID = s
+Group17.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group17.bufferSize = 3M
 Group17.movementModel = StationaryMovement
 Group17.nodeLocation = 10557,4397
@@ -219,6 +248,8 @@ Group17.nrofInterfaces = 1
 Group17.interface1 = w802-11bInterface
 
 Group18.groupID = s
+Group18.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group18.bufferSize = 3M
 Group18.movementModel = StationaryMovement
 Group18.nodeLocation = 7060,4835
@@ -227,6 +258,8 @@ Group18.nrofInterfaces = 1
 Group18.interface1 = w802-11bInterface
 
 Group19.groupID = s
+Group19.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group19.bufferSize = 3M
 Group19.movementModel = StationaryMovement
 Group19.nodeLocation = 5800,4350
@@ -235,6 +268,8 @@ Group19.nrofInterfaces = 1
 Group19.interface1 = w802-11bInterface
 
 Group20.groupID = s
+Group20.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group20.bufferSize = 3M
 Group20.movementModel = StationaryMovement
 Group20.nodeLocation = 6655,4357
@@ -243,6 +278,8 @@ Group20.nrofInterfaces = 1
 Group20.interface1 = w802-11bInterface
 
 Group21.groupID = s
+Group21.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group21.bufferSize = 3M
 Group21.movementModel = StationaryMovement
 Group21.nodeLocation = 8075,4370
@@ -251,6 +288,8 @@ Group21.nrofInterfaces = 1
 Group21.interface1 = w802-11bInterface
 
 Group22.groupID = s
+Group22.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group22.bufferSize = 3M
 Group22.movementModel = StationaryMovement
 Group22.nodeLocation = 8170,3785
@@ -259,6 +298,8 @@ Group22.nrofInterfaces = 1
 Group22.interface1 = w802-11bInterface
 
 Group23.groupID = s
+Group23.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group23.bufferSize = 3M
 Group23.movementModel = StationaryMovement
 Group23.nodeLocation = 6047,2025
@@ -267,6 +308,8 @@ Group23.nrofInterfaces = 1
 Group23.interface1 = w802-11bInterface
 
 Group24.groupID = s
+Group24.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group24.bufferSize = 3M
 Group24.movementModel = StationaryMovement
 Group24.nodeLocation = 7056,2445
@@ -275,6 +318,8 @@ Group24.nrofInterfaces = 1
 Group24.interface1 = w802-11bInterface
 
 Group25.groupID = s
+Group25.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group25.bufferSize = 3M
 Group25.movementModel = StationaryMovement
 Group25.nodeLocation = 7585,1230
@@ -283,6 +328,8 @@ Group25.nrofInterfaces = 1
 Group25.interface1 = w802-11bInterface
 
 Group26.groupID = s
+Group26.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group26.bufferSize = 3M
 Group26.movementModel = StationaryMovement
 Group26.nodeLocation = 8947,1620
@@ -291,6 +338,8 @@ Group26.nrofInterfaces = 1
 Group26.interface1 = w802-11bInterface
 
 Group27.groupID = s
+Group27.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group27.bufferSize = 3M
 Group27.movementModel = StationaryMovement
 Group27.nodeLocation = 10737,1995
@@ -299,6 +348,8 @@ Group27.nrofInterfaces = 1
 Group27.interface1 = w802-11bInterface
 
 Group28.groupID = s
+Group28.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group28.bufferSize = 3M
 Group28.movementModel = StationaryMovement
 Group28.nodeLocation = 12703,4403
@@ -307,6 +358,8 @@ Group28.nrofInterfaces = 1
 Group28.interface1 = w802-11bInterface
 
 Group29.groupID = s
+Group29.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group29.bufferSize = 3M
 Group29.movementModel = StationaryMovement
 Group29.nodeLocation = 18580,1420
@@ -315,6 +368,8 @@ Group29.nrofInterfaces = 1
 Group29.interface1 = w802-11bInterface
 
 Group30.groupID = s
+Group30.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group30.bufferSize = 3M
 Group30.movementModel = StationaryMovement
 Group30.nodeLocation = 4370,9330
@@ -323,6 +378,8 @@ Group30.nrofInterfaces = 1
 Group30.interface1 = w802-11bInterface
 
 Group31.groupID = s
+Group31.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group31.bufferSize = 3M
 Group31.movementModel = StationaryMovement
 Group31.nodeLocation = 9670,6510
@@ -331,6 +388,8 @@ Group31.nrofInterfaces = 1
 Group31.interface1 = w802-11bInterface
 
 Group32.groupID = s
+Group32.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group32.bufferSize = 3M
 Group32.movementModel = StationaryMovement
 Group32.nodeLocation = 6240,820
@@ -339,6 +398,8 @@ Group32.nrofInterfaces = 1
 Group32.interface1 = w802-11bInterface
 
 Group33.groupID = s
+Group33.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group33.bufferSize = 3M
 Group33.movementModel = StationaryMovement
 Group33.nodeLocation = 7870,3785
@@ -347,6 +408,8 @@ Group33.nrofInterfaces = 1
 Group33.interface1 = w802-11bInterface
 
 Group34.groupID = s
+Group34.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group34.bufferSize = 3M
 Group34.movementModel = StationaryMovement
 Group34.nodeLocation = 6030,6420
@@ -355,6 +418,8 @@ Group34.nrofInterfaces = 1
 Group34.interface1 = w802-11bInterface
 
 Group35.groupID = s
+Group35.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group35.bufferSize = 3M
 Group35.movementModel = StationaryMovement
 Group35.nodeLocation = 4615,6375
@@ -363,6 +428,8 @@ Group35.nrofInterfaces = 1
 Group35.interface1 = w802-11bInterface
 
 Group36.groupID = s
+Group36.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group36.bufferSize = 3M
 Group36.movementModel = StationaryMovement
 Group36.nodeLocation = 1660,6235
@@ -371,6 +438,8 @@ Group36.nrofInterfaces = 1
 Group36.interface1 = w802-11bInterface
 
 Group37.groupID = s
+Group37.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group37.bufferSize = 3M
 Group37.movementModel = StationaryMovement
 Group37.nodeLocation = 2115,6265
@@ -379,6 +448,8 @@ Group37.nrofInterfaces = 1
 Group37.interface1 = w802-11bInterface
 
 Group38.groupID = s
+Group38.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group38.bufferSize = 3M
 Group38.movementModel = StationaryMovement
 Group38.nodeLocation = 5850,3815
@@ -387,6 +458,8 @@ Group38.nrofInterfaces = 1
 Group38.interface1 = w802-11bInterface
 
 Group39.groupID = s
+Group39.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group39.bufferSize = 3M
 Group39.movementModel = StationaryMovement
 Group39.nodeLocation = 5105,4340
@@ -395,6 +468,8 @@ Group39.nrofInterfaces = 1
 Group39.interface1 = w802-11bInterface
 
 Group40.groupID = s
+Group40.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group40.bufferSize = 3M
 Group40.movementModel = StationaryMovement
 Group40.nodeLocation = 4205,4213
@@ -403,6 +478,8 @@ Group40.nrofInterfaces = 1
 Group40.interface1 = w802-11bInterface
 
 Group41.groupID = s
+Group41.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group41.bufferSize = 3M
 Group41.movementModel = StationaryMovement
 Group41.nodeLocation = 7080,6440
@@ -411,6 +488,8 @@ Group41.nrofInterfaces = 1
 Group41.interface1 = w802-11bInterface
 
 Group42.groupID = s
+Group42.router = DecisionEngineRouter
+DecisionEngineRouter.decisionEngine = SensorRouter
 Group42.bufferSize = 3M
 Group42.movementModel = StationaryMovement
 Group42.nodeLocation = 6580,10280
@@ -419,87 +498,87 @@ Group42.nrofInterfaces = 1
 Group42.interface1 = w802-11bInterface
 
 #Group for Bus TransJogja - 117 nodes
-Group43.groupID = j1A_
+Group43.groupID = 1A_
 Group43.routeType = 1
 Group43.routeFile = data/Jalur1A.wkt
 Group43.nrofHosts = 15
 
-Group44.groupID = j1B_
+Group44.groupID = 1B_
 Group44.routeType = 1
 Group44.routeFile = data/Jalur1B.wkt
 Group44.nrofHosts = 9
 
-Group45.groupID = j2A_
+Group45.groupID = 2A_
 Group45.routeType = 1
 Group45.routeFile = data/Jalur2A.wkt
 Group45.nrofHosts = 10
 
-Group46.groupID = j2B_
+Group46.groupID = 2B_
 Group46.routeType = 1
 Group46.routeFile = data/Jalur2B.wkt
 Group46.nrofHosts = 10
 
-Group47.groupID = j3A_
+Group47.groupID = 3A_
 Group47.routeType = 1
 Group47.routeFile = data/Jalur3A.wkt
 Group47.nrofHosts = 11
 
-Group48.groupID = j3B_
+Group48.groupID = 3B_
 Group48.routeFile = data/Jalur3B.wkt
 Group48.routeType = 1
 Group48.nrofHosts = 11
 
-Group49.groupID = j4A_
+Group49.groupID = 4A_
 Group49.routeType = 1
 Group49.routeFile = data/Jalur4A.wkt
 Group49.nrofHosts = 5
 
-Group50.groupID = j4B_
+Group50.groupID = 4B_
 Group50.routeType = 1
 Group50.routeFile = data/Jalur4B.wkt
 Group50.nrofHosts = 6
 
-Group51.groupID = j5A_
+Group51.groupID = 5A_
 Group51.routeType = 1
 Group51.routeFile = data/Jalur5A.wkt
 Group51.nrofHosts = 4
 
-Group52.groupID = j5B_
+Group52.groupID = 5B_
 Group52.routeType = 1
 Group52.routeFile = data/Jalur5B.wkt
 Group52.nrofHosts = 4
 
-Group53.groupID = j6A_
+Group53.groupID = 6A_
 Group53.routeType = 1
 Group53.routeFile = data/Jalur6A.wkt
 Group53.nrofHosts = 4
 
-Group54.groupID = j6B_
+Group54.groupID = 6B_
 Group54.routeType = 1
 Group54.routeFile = data/Jalur6B.wkt
 Group54.nrofHosts = 4
 
-Group55.groupID = j7_
+Group55.groupID = 7_
 Group55.routeType = 1
 Group55.routeFile = data/Jalur7.wkt
 Group55.nrofHosts = 3
 
-Group56.groupID = j8_
+Group56.groupID = 8_
 Group56.routeType = 1
 Group56.routeFile = data/Jalur8.wkt
 Group56.nrofHosts = 5
 
-Group57.groupID = j9_
+Group57.groupID = 9_
 Group57.routeType = 1
 Group57.routeFile = data/Jalur9.wkt
 Group57.nrofHosts = 6
 
-Group58.groupID = j10_
+Group58.groupID = 10_
 Group58.routeType = 1
 Group58.routeFile = data/Jalur10.wkt
 Group58.nrofHosts = 6
 
-Group59.groupID = j11_
+Group59.groupID = 11_
 Group59.routeType = 1
 Group59.routeFile = data/Jalur11.wkt
 Group59.nrofHosts = 4
