@@ -79,15 +79,15 @@ import core.*;
  *
  * @author PJ Dillon, University of Pittsburgh
  */
-public class DecisionEngineRouter extends ActiveRouter {
+public class DecisionEngineBusTjRouter extends ActiveRouter {
 
-    public static final String PUBSUB_NS = "DecisionEngineRouter";
+    public static final String PUBSUB_NS = "DecisionEngineBusTjRouter";
     public static final String ENGINE_SETTING = "decisionEngine";
     public static final String TOMBSTONE_SETTING = "tombstones";
     public static final String CONNECTION_STATE_SETTING = "";
 
     protected boolean tombstoning;
-    protected RoutingDecisionEngine decider;
+    protected RoutingDecisionEngineBusTj decider;
     protected List<Tuple<Message, Connection>> outgoingMessages;
 
     protected Set<String> tombstones;
@@ -98,14 +98,14 @@ public class DecisionEngineRouter extends ActiveRouter {
      */
     protected Map<Connection, Integer> conStates;
 
-    public DecisionEngineRouter(Settings s) {
+    public DecisionEngineBusTjRouter(Settings s) {
         super(s);
 
         Settings routeSettings = new Settings(PUBSUB_NS);
 
         outgoingMessages = new LinkedList<Tuple<Message, Connection>>();
 
-        decider = (RoutingDecisionEngine) routeSettings.createIntializedObject(
+        decider = (RoutingDecisionEngineBusTj) routeSettings.createIntializedObject(
                 "routing." + routeSettings.getSetting(ENGINE_SETTING));
 
         if (routeSettings.contains(TOMBSTONE_SETTING)) {
@@ -120,7 +120,7 @@ public class DecisionEngineRouter extends ActiveRouter {
         conStates = new HashMap<Connection, Integer>(4);
     }
 
-    public DecisionEngineRouter(DecisionEngineRouter r) {
+    public DecisionEngineBusTjRouter(DecisionEngineBusTjRouter r) {
         super(r);
         outgoingMessages = new LinkedList<Tuple<Message, Connection>>();
         decider = r.decider.replicate();
@@ -134,7 +134,7 @@ public class DecisionEngineRouter extends ActiveRouter {
 
     //@Override
     public MessageRouter replicate() {
-        return new DecisionEngineRouter(this);
+        return new DecisionEngineBusTjRouter(this);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class DecisionEngineRouter extends ActiveRouter {
     public void changedConnection(Connection con) {
         DTNHost myHost = getHost();
         DTNHost otherNode = con.getOtherNode(myHost);
-        DecisionEngineRouter otherRouter = (DecisionEngineRouter) otherNode.getRouter();
+        DecisionEngineBusTjRouter otherRouter = (DecisionEngineBusTjRouter) otherNode.getRouter();
         if (con.isUp()) {
             decider.connectionUp(myHost, otherNode);
 
@@ -257,7 +257,7 @@ public class DecisionEngineRouter extends ActiveRouter {
              */
             Collection<Message> msgs = getMessageCollection();
             for (Message m : msgs) {
-                if (decider.shouldSendMessageToHost(m, otherNode)) {
+                if (decider.shouldSendMessageToHost(m, otherNode, getHost())) {
                     outgoingMessages.add(new Tuple<Message, Connection>(m, con));
                 }
             }
@@ -392,7 +392,7 @@ public class DecisionEngineRouter extends ActiveRouter {
             }
         }
 
-        if (decider.shouldDeleteSentMessage(transferred, con.getOtherNode(getHost()))) {
+        if (decider.shouldDeleteSentMessage(transferred, con.getOtherNode(getHost()), getHost())) {
 //            if (transferred.getId().equals("M14")) {
 //                System.out.println("Host: " + getHost() + " deleting M14 after transfer");
 //            }
@@ -426,7 +426,7 @@ public class DecisionEngineRouter extends ActiveRouter {
         }
     }
 
-    public RoutingDecisionEngine getDecisionEngine() {
+    public RoutingDecisionEngineBusTj getDecisionEngine() {
         return this.decider;
     }
 
@@ -439,7 +439,7 @@ public class DecisionEngineRouter extends ActiveRouter {
 //        for (Connection c : getHost()) 
         for (Connection c : getConnections()) {
             DTNHost other = c.getOtherNode(getHost());
-            if (other != from && decider.shouldSendMessageToHost(m, other)) {
+            if (other != from && decider.shouldSendMessageToHost(m, other, getHost())) {
 //                if (m.getId().equals("M14")) {
 //                    System.out.println("Adding attempt for M14 from: " + getHost() + " to: " + other);
 //                }

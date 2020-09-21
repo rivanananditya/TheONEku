@@ -11,7 +11,6 @@ Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
 # 43200 == 12h
 # 64800 == 18h
-# 68400 == 19h
 Scenario.endTime = 64800
 
 ## Interface-specific settings:
@@ -57,11 +56,13 @@ Scenario.nrofHostGroups = 59
 
 # Common settings for all groups
 Group.movementModel = MapRouteMovementWithStop
-#RapidRouterTest
-#EpidemicRouter
-#RapidRouter
+#RapidKnapsackBusTjRouter
+#EpidemicBusTjRouter
+#RapidBusTjRouter
 
-Group.router = RapidRouterTest
+Group.router = RapidKnapsackBusTjRouter
+#Group.router = DecisionEngineBusTjRouter
+#DecisionEngineBusTjRouter.decisionEngine = EpidemicBusTjRouter
 
 Group.bufferSize = 40M
 Group.waitTime = 0, 0
@@ -518,7 +519,7 @@ Events1.class = MessageEventGeneratorBusTJ
 
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events1.interval = 300,300
+Events1.interval = 10,10
 # Message sizes (500kB - 1MB)
 #Events1.size = 500k,1M
 Events1.size = 100k,500k
@@ -548,10 +549,7 @@ Report.nrofReports = 6
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
-#Report.reportDir = reports/BusTj/testDE/2/
-Report.reportDir = reports/BusTj/testRRA1800/transmitrange501525and3MbufferSensor20MbusMISSED_DEADLINES/
-#Report.reportDir = reports/BusTj/testKP1/1/
-#Report.reportDir = reports/BusTj/testEpidemic/1/
+Report.reportDir = reports/BusTj/AutoCreateM/
 # Report classes to load
 
 #Report.report1 = ReportBusPesanLalulintas

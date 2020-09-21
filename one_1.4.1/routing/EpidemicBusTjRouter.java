@@ -8,17 +8,19 @@ package routing;
 import core.Connection;
 import core.DTNHost;
 import core.Message;
+import core.MessageListener;
 import core.Settings;
 import core.SimClock;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
  *
  * @author Afra Rian
  */
-public class EpidemicBusTjRouter implements RoutingDecisionEngine {
+public class EpidemicBusTjRouter implements RoutingDecisionEngineBusTj {
 
     public EpidemicBusTjRouter(Settings s) {
         super();
@@ -59,7 +61,7 @@ public class EpidemicBusTjRouter implements RoutingDecisionEngine {
     }
 
     @Override
-    public boolean shouldSendMessageToHost(Message m, DTNHost otherHost) {
+    public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost) {
         if (String.valueOf(otherHost.toString().charAt(0)).equals("s")) {
             return false;
         }
@@ -67,8 +69,8 @@ public class EpidemicBusTjRouter implements RoutingDecisionEngine {
     }
 
     @Override
-    public boolean shouldDeleteSentMessage(Message m, DTNHost otherHost) {
-        if (!String.valueOf(otherHost.toString().charAt(0)).equals("s")) {
+    public boolean shouldDeleteSentMessage(Message m, DTNHost otherHost, DTNHost thisHost) {
+        if (String.valueOf(thisHost.toString().charAt(0)).equals("s")) {
             return false;
         }
         return true;
@@ -80,15 +82,15 @@ public class EpidemicBusTjRouter implements RoutingDecisionEngine {
     }
 
     @Override
-    public RoutingDecisionEngine replicate() {
+    public RoutingDecisionEngineBusTj replicate() {
         return new EpidemicBusTjRouter(this);
     }
 
     private EpidemicBusTjRouter getOtherEpidemicRouter(DTNHost host) {
         MessageRouter otherRouter = host.getRouter();
-        assert otherRouter instanceof DecisionEngineRouter : "This router only works "
+        assert otherRouter instanceof DecisionEngineRapidRouter : "This router only works "
                 + " with other routers of same type";
 
-        return (EpidemicBusTjRouter) ((DecisionEngineRouter) otherRouter).getDecisionEngine();
+        return (EpidemicBusTjRouter) ((DecisionEngineRapidRouter) otherRouter).getDecisionEngine();
     }
 }
