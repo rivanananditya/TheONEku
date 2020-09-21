@@ -14,7 +14,7 @@ Scenario.updateInterval = 0.1
 # 68400 == 19h
 Scenario.endTime = 64800
 
-## Interface-specific settings:
+## Interface-specific settings: 
 # type : which interface class the interface belongs to
 # For different types, the sub-parameters are interface-specific
 # For SimpleBroadcastInterface, the parameters are:
@@ -26,7 +26,7 @@ w802-11pInterface.type = SimpleBroadcastInterface
 #250kbps = 38kBps
 #2Mbps = 250kBps
 w802-11pInterface.transmitSpeed = 750k
-w802-11pInterface.transmitRange = 200
+w802-11pInterface.transmitRange = 300
 
 # interface for 802.11b link profile
 w802-11bInterface.type = SimpleBroadcastInterface

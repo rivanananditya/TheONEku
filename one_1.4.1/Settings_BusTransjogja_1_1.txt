@@ -26,7 +26,7 @@ w802-11pInterface.type = SimpleBroadcastInterface
 #250kbps = 38kBps
 #2Mbps = 250kBps
 w802-11pInterface.transmitSpeed = 750k
-w802-11pInterface.transmitRange = 200
+w802-11pInterface.transmitRange = 300
 
 # interface for 802.11b link profile
 w802-11bInterface.type = SimpleBroadcastInterface
@@ -521,7 +521,7 @@ Events1.class = MessageEventGeneratorBusTJ
 Events1.interval = 300,300
 # Message sizes (500kB - 1MB)
 #Events1.size = 500k,1M
-Events1.size = 1k,10k
+Events1.size = 100k,500k
 # range of message source/destination addresses
 Events1.hosts = 4,41
 Events1.tohosts = 0,0
