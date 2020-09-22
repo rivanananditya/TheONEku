@@ -143,7 +143,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             doHostMapping(con);
             this.delayTable.dummyUpdateConnection(con);
 
-            if (!String.valueOf(otherHost.toString().charAt(0)).equals("s")) {
+            if (!String.valueOf(getHost().toString().charAt(0)).equals("s")) {
                 cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
             }
 //            if (String.valueOf(getHost().toString().charAt(0)).equals("s")) {

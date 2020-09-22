@@ -519,7 +519,7 @@ Events1.class = MessageEventGeneratorBusTJ
 
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events1.interval = 10,10
+Events1.interval = 20,20
 # Message sizes (500kB - 1MB)
 #Events1.size = 500k,1M
 Events1.size = 100k,500k
@@ -549,7 +549,7 @@ Report.nrofReports = 6
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
-Report.reportDir = reports/BusTj/AutoCreateM/
+Report.reportDir = reports/BusTj/AutoCreateM20sPerSensor/
 # Report classes to load
 
 #Report.report1 = ReportBusPesanLalulintas
@@ -563,7 +563,7 @@ Report.report2 = LatencyPerContactReport
 Report.report3 = MessageDeliveredPerContactReport
 Report.report4 = PercentageMessageDeliveredPerContactReport
 Report.report5 = OverheadPerContactReport
-Report.report6 = BufferOccupancyPerContact
+Report.report6 = DropPerContactReport
 
 ## Default settings for some routers settings
 ProphetRouter.secondsInTimeUnit = 30
