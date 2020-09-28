@@ -15,276 +15,318 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * World contains all the nodes and is responsible for updating their
- * location and connections.
+ * World contains all the nodes and is responsible for updating their location
+ * and connections.
  */
 public class World {
-	/** namespace of optimization settings ({@value})*/
-	public static final String SETTINGS_NS = "Optimization";
-	/**
-	 * Cell based optimization cell size multiplier -setting id ({@value}).
-	 * Single ConnectivityCell's size is the biggest radio range times this.
-	 * Larger values save memory and decrease startup time but may result in
-	 * slower simulation.
-	 * Default value is {@link #DEF_CON_CELL_SIZE_MULT}.
-	 * Smallest accepted value is 2.
-	 * @see ConnectivityGrid
-	 */
-	public static final String CELL_SIZE_MULT_S = "cellSizeMult";
-	/**
-	 * Should the order of node updates be different (random) within every 
-	 * update step -setting id ({@value}). Boolean (true/false) variable. 
-	 * Default is @link {@link #DEF_RANDOMIZE_UPDATES}.
-	 */
-	public static final String RANDOMIZE_UPDATES_S = "randomizeUpdateOrder";
-	/** default value for cell size multiplier ({@value}) */
-	public static final int DEF_CON_CELL_SIZE_MULT = 5;
-	/** should the update order of nodes be randomized -setting's default value
-	 * ({@value}) */
-	public static final boolean DEF_RANDOMIZE_UPDATES = true;
 
-	private int sizeX;
-	private int sizeY;
-	private List<EventQueue> eventQueues;
-	private double updateInterval;
-	private SimClock simClock;
-	private double nextQueueEventTime;
-	private EventQueue nextEventQueue;
-	/** list of nodes; nodes are indexed by their network address */
-	private List<DTNHost> hosts;
-	private boolean simulateConnections;
-	/** nodes in the order they should be updated (if the order should be 
-	 * randomized; null value means that the order should not be randomized) */
-	private ArrayList<DTNHost> updateOrder;
-	/** is cancellation of simulation requested from UI */
-	private boolean isCancelled;
-	private List<UpdateListener> updateListeners;
-	/** Queue of scheduled update requests */
-	private ScheduledUpdatesQueue scheduledUpdates;
+    /**
+     * namespace of optimization settings ({@value})
+     */
+    public static final String SETTINGS_NS = "Optimization";
+    /**
+     * Cell based optimization cell size multiplier -setting id ({@value}).
+     * Single ConnectivityCell's size is the biggest radio range times this.
+     * Larger values save memory and decrease startup time but may result in
+     * slower simulation. Default value is {@link #DEF_CON_CELL_SIZE_MULT}.
+     * Smallest accepted value is 2.
+     *
+     * @see ConnectivityGrid
+     */
+    public static final String CELL_SIZE_MULT_S = "cellSizeMult";
+    /**
+     * Should the order of node updates be different (random) within every
+     * update step -setting id ({@value}). Boolean (true/false) variable.
+     * Default is @link {@link #DEF_RANDOMIZE_UPDATES}.
+     */
+    public static final String RANDOMIZE_UPDATES_S = "randomizeUpdateOrder";
+    /**
+     * default value for cell size multiplier ({@value})
+     */
+    public static final int DEF_CON_CELL_SIZE_MULT = 5;
+    /**
+     * should the update order of nodes be randomized -setting's default value
+     * ({@value})
+     */
+    public static final boolean DEF_RANDOMIZE_UPDATES = true;
 
-	/** single ConnectivityCell's size is biggest radio range times this */
-	private int conCellSizeMult;
+    private int sizeX;
+    private int sizeY;
+    private List<EventQueue> eventQueues;
+    private double updateInterval;
+    private SimClock simClock;
+    private double nextQueueEventTime;
+    private EventQueue nextEventQueue;
+    /**
+     * list of nodes; nodes are indexed by their network address
+     */
+    private List<DTNHost> hosts;
+    private boolean simulateConnections;
+    /**
+     * nodes in the order they should be updated (if the order should be
+     * randomized; null value means that the order should not be randomized)
+     */
+    private ArrayList<DTNHost> updateOrder;
+    /**
+     * is cancellation of simulation requested from UI
+     */
+    private boolean isCancelled;
+    private List<UpdateListener> updateListeners;
+    /**
+     * Queue of scheduled update requests
+     */
+    private ScheduledUpdatesQueue scheduledUpdates;
 
-	/**
-	 * Constructor.
-	 */
-	public World(List<DTNHost> hosts, int sizeX, int sizeY, 
-			double updateInterval, List<UpdateListener> updateListeners,
-			boolean simulateConnections, List<EventQueue> eventQueues) {
-		this.hosts = hosts;
-		this.sizeX = sizeX;
-		this.sizeY = sizeY;
-		this.updateInterval = updateInterval;
-		this.updateListeners = updateListeners;
-		this.simulateConnections = simulateConnections;
-		this.eventQueues = eventQueues;
-		
-		this.simClock = SimClock.getInstance();
-		this.scheduledUpdates = new ScheduledUpdatesQueue();
-		this.isCancelled = false;		
+    /**
+     * single ConnectivityCell's size is biggest radio range times this
+     */
+    private int conCellSizeMult;
 
-		setNextEventQueue();
-		initSettings();
-	}
+    ArrayList<DTNHost> nodes = new ArrayList<>();
 
-	/**
-	 * Initializes settings fields that can be configured using Settings class
-	 */
-	private void initSettings() {
-		Settings s = new Settings(SETTINGS_NS);
-		boolean randomizeUpdates = DEF_RANDOMIZE_UPDATES;
+    /**
+     * Constructor.
+     */
+    public World(List<DTNHost> hosts, int sizeX, int sizeY,
+            double updateInterval, List<UpdateListener> updateListeners,
+            boolean simulateConnections, List<EventQueue> eventQueues) {
+        this.hosts = hosts;
+        this.sizeX = sizeX;
+        this.sizeY = sizeY;
+        this.updateInterval = updateInterval;
+        this.updateListeners = updateListeners;
+        this.simulateConnections = simulateConnections;
+        this.eventQueues = eventQueues;
 
-		if (s.contains(RANDOMIZE_UPDATES_S)) {
-			randomizeUpdates = s.getBoolean(RANDOMIZE_UPDATES_S);
-		}
-		if(randomizeUpdates) {
-			// creates the update order array that can be shuffled
-			this.updateOrder = new ArrayList<DTNHost>(this.hosts);
-		}
-		else { // null pointer means "don't randomize"
-			this.updateOrder = null;
-		}
+        this.simClock = SimClock.getInstance();
+        this.scheduledUpdates = new ScheduledUpdatesQueue();
+        this.isCancelled = false;
 
-		if (s.contains(CELL_SIZE_MULT_S)) {
-			conCellSizeMult = s.getInt(CELL_SIZE_MULT_S);
-		}
-		else {
-			conCellSizeMult = DEF_CON_CELL_SIZE_MULT;
-		}
+        setNextEventQueue();
+        initSettings();
+    }
 
-		// check that values are within limits
-		if (conCellSizeMult < 2) {
-			throw new SettingsError("Too small value (" + conCellSizeMult +
-					") for " + SETTINGS_NS + "." + CELL_SIZE_MULT_S);
-		}
-	}
+    /**
+     * Initializes settings fields that can be configured using Settings class
+     */
+    private void initSettings() {
+        Settings s = new Settings(SETTINGS_NS);
+        boolean randomizeUpdates = DEF_RANDOMIZE_UPDATES;
 
-	/**
-	 * Moves hosts in the world for the time given time initialize host 
-	 * positions properly. SimClock must be set to <CODE>-time</CODE> before
-	 * calling this method.
-	 * @param time The total time (seconds) to move
-	 */
-	public void warmupMovementModel(double time) {
-		if (time <= 0) {
-			return;
-		}
+        if (s.contains(RANDOMIZE_UPDATES_S)) {
+            randomizeUpdates = s.getBoolean(RANDOMIZE_UPDATES_S);
+        }
+        if (randomizeUpdates) {
+            // creates the update order array that can be shuffled
+            this.updateOrder = new ArrayList<DTNHost>(this.hosts);
+        } else { // null pointer means "don't randomize"
+            this.updateOrder = null;
+        }
 
-		while(SimClock.getTime() < -updateInterval) {
-			moveHosts(updateInterval);
-			simClock.advance(updateInterval);
-		}
+        if (s.contains(CELL_SIZE_MULT_S)) {
+            conCellSizeMult = s.getInt(CELL_SIZE_MULT_S);
+        } else {
+            conCellSizeMult = DEF_CON_CELL_SIZE_MULT;
+        }
 
-		double finalStep = -SimClock.getTime();
+        // check that values are within limits
+        if (conCellSizeMult < 2) {
+            throw new SettingsError("Too small value (" + conCellSizeMult
+                    + ") for " + SETTINGS_NS + "." + CELL_SIZE_MULT_S);
+        }
+    }
 
-		moveHosts(finalStep);
-		simClock.setTime(0);	
-	}
+    /**
+     * Moves hosts in the world for the time given time initialize host
+     * positions properly. SimClock must be set to <CODE>-time</CODE> before
+     * calling this method.
+     *
+     * @param time The total time (seconds) to move
+     */
+    public void warmupMovementModel(double time) {
+        if (time <= 0) {
+            return;
+        }
 
-	/**
-	 * Goes through all event Queues and sets the 
-	 * event queue that has the next event.
-	 */
-	public void setNextEventQueue() {
-		EventQueue nextQueue = scheduledUpdates;
-		double earliest = nextQueue.nextEventsTime();
+        while (SimClock.getTime() < -updateInterval) {
+            moveHosts(updateInterval);
+            simClock.advance(updateInterval);
+        }
 
-		/* find the queue that has the next event */
-		for (EventQueue eq : eventQueues) {
-			if (eq.nextEventsTime() < earliest){
-				nextQueue = eq;	
-				earliest = eq.nextEventsTime();
-			}
-		}
+        double finalStep = -SimClock.getTime();
 
-		this.nextEventQueue = nextQueue;
-		this.nextQueueEventTime = earliest;
-	}
+        moveHosts(finalStep);
+        simClock.setTime(0);
+    }
 
-	/** 
-	 * Update (move, connect, disconnect etc.) all hosts in the world.
-	 * Runs all external events that are due between the time when
-	 * this method is called and after one update interval.
-	 */
-	public void update () {
-		double runUntil = SimClock.getTime() + this.updateInterval;
+    /**
+     * Goes through all event Queues and sets the event queue that has the next
+     * event.
+     */
+    public void setNextEventQueue() {
+        EventQueue nextQueue = scheduledUpdates;
+        double earliest = nextQueue.nextEventsTime();
 
-		setNextEventQueue();
+        /* find the queue that has the next event */
+        for (EventQueue eq : eventQueues) {
+            if (eq.nextEventsTime() < earliest) {
+                nextQueue = eq;
+                earliest = eq.nextEventsTime();
+            }
+        }
 
-		/* process all events that are due until next interval update */
-		while (this.nextQueueEventTime <= runUntil) {
-			simClock.setTime(this.nextQueueEventTime);
-			ExternalEvent ee = this.nextEventQueue.nextEvent();
-			ee.processEvent(this);
-			updateHosts(); // update all hosts after every event
-			setNextEventQueue();
-		}
+        this.nextEventQueue = nextQueue;
+        this.nextQueueEventTime = earliest;
+    }
 
-		moveHosts(this.updateInterval);
-		simClock.setTime(runUntil);
+    /**
+     * Update (move, connect, disconnect etc.) all hosts in the world. Runs all
+     * external events that are due between the time when this method is called
+     * and after one update interval.
+     */
+    public void update() {
+        double runUntil = SimClock.getTime() + this.updateInterval;
 
-		updateHosts();
+        setNextEventQueue();
 
-		/* inform all update listeners */
-		for (UpdateListener ul : this.updateListeners) {
-			ul.updated(this.hosts);
-		}
-	}
+        /* process all events that are due until next interval update */
+        while (this.nextQueueEventTime <= runUntil) {
+            simClock.setTime(this.nextQueueEventTime);
+            ExternalEvent ee = this.nextEventQueue.nextEvent();
+            ee.processEvent(this);
+            updateHosts(); // update all hosts after every event
+            setNextEventQueue();
+        }
 
-	/**
-	 * Updates all hosts (calls update for every one of them). If update
-	 * order randomizing is on (updateOrder array is defined), the calls
-	 * are made in random order.
-	 */
-	private void updateHosts() {
-		if (this.updateOrder == null) { // randomizing is off
-			for (int i=0, n = hosts.size();i < n; i++) {
-				if (this.isCancelled) {
-					break;
-				}
-				hosts.get(i).update(simulateConnections);
-			}
-		}
-		else { // update order randomizing is on
-			assert this.updateOrder.size() == this.hosts.size() : 
-				"Nrof hosts has changed unexpectedly";
-			Random rng = new Random(SimClock.getIntTime());
-			Collections.shuffle(this.updateOrder, rng); 
-			for (int i=0, n = hosts.size();i < n; i++) {
-				if (this.isCancelled) {
-					break;
-				}
-				this.updateOrder.get(i).update(simulateConnections);
-			}			
-		}
-	}
+        moveHosts(this.updateInterval);
+        simClock.setTime(runUntil);
 
-	/**
-	 * Moves all hosts in the world for a given amount of time
-	 * @param timeIncrement The time how long all nodes should move
-	 */
-	private void moveHosts(double timeIncrement) {
-		for (int i=0,n = hosts.size(); i<n; i++) {
-			DTNHost host = hosts.get(i);
-			host.move(timeIncrement);			
-		}		
-	}
+        updateHosts();
 
-	/**
-	 * Asynchronously cancels the currently running simulation
-	 */
-	public void cancelSim() {
-		this.isCancelled = true;
-	}
+        /* inform all update listeners */
+        for (UpdateListener ul : this.updateListeners) {
+            ul.updated(this.hosts);
+        }
+    }
 
-	/**
-	 * Returns the hosts in a list
-	 * @return the hosts in a list
-	 */
-	public List<DTNHost> getHosts() {
-		return this.hosts;
-	}
+    /**
+     * Updates all hosts (calls update for every one of them). If update order
+     * randomizing is on (updateOrder array is defined), the calls are made in
+     * random order.
+     */
+    private void updateHosts() {
+        if (this.updateOrder == null) { // randomizing is off
+            for (int i = 0, n = hosts.size(); i < n; i++) {
+                if (this.isCancelled) {
+                    break;
+                }
+                hosts.get(i).update(simulateConnections);
+            }
+        } else { // update order randomizing is on
+            assert this.updateOrder.size() == this.hosts.size() :
+                    "Nrof hosts has changed unexpectedly";
+            Random rng = new Random(SimClock.getIntTime());
+            Collections.shuffle(this.updateOrder, rng);
+            for (int i = 0, n = hosts.size(); i < n; i++) {
+                if (this.isCancelled) {
+                    break;
+                }
+                this.updateOrder.get(i).update(simulateConnections);
+            }
+        }
+    }
 
-	/**
-	 * Returns the x-size (width) of the world 
-	 * @return the x-size (width) of the world 
-	 */
-	public int getSizeX() {
-		return this.sizeX;
-	}
+    /**
+     * Moves all hosts in the world for a given amount of time
+     *
+     * @param timeIncrement The time how long all nodes should move
+     */
+    private void moveHosts(double timeIncrement) {
+        for (int i = 0, n = hosts.size(); i < n; i++) {
+            DTNHost host = hosts.get(i);
+            host.move(timeIncrement);
+        }
+    }
 
-	/**
-	 * Returns the y-size (height) of the world 
-	 * @return the y-size (height) of the world 
-	 */
-	public int getSizeY() {
-		return this.sizeY;
-	}
+    /**
+     * Asynchronously cancels the currently running simulation
+     */
+    public void cancelSim() {
+        this.isCancelled = true;
+    }
 
-	/**
-	 * Returns a node from the world by its address
-	 * @param address The address of the node
-	 * @return The requested node or null if it wasn't found
-	 */
-	public DTNHost getNodeByAddress(int address) {
-		if (address < 0 || address >= hosts.size()) {
-			throw new SimError("No host for address " + address + ". Address " +
-					"range of 0-" + (hosts.size()-1) + " is valid");
-		}
+    /**
+     * Returns the hosts in a list
+     *
+     * @return the hosts in a list
+     */
+    public List<DTNHost> getHosts() {
+        return this.hosts;
+    }
 
-		DTNHost node = this.hosts.get(address);
-		assert node.getAddress() == address : "Node indexing failed. " + 
-			"Node " + node + " in index " + address;
+    /**
+     * Returns the x-size (width) of the world
+     *
+     * @return the x-size (width) of the world
+     */
+    public int getSizeX() {
+        return this.sizeX;
+    }
 
-		return node; 
-	}
+    /**
+     * Returns the y-size (height) of the world
+     *
+     * @return the y-size (height) of the world
+     */
+    public int getSizeY() {
+        return this.sizeY;
+    }
 
-	/**
-	 * Schedules an update request to all nodes to happen at the specified 
-	 * simulation time.
-	 * @param simTime The time of the update
-	 */
-	public void scheduleUpdate(double simTime) {
-		scheduledUpdates.addUpdate(simTime);
-	}
+    /**
+     * Returns a node from the world by its address
+     *
+     * @param address The address of the node
+     * @return The requested node or null if it wasn't found
+     */
+    public DTNHost getNodeByAddress(int address) {
+        if (address < 0 || address >= hosts.size()) {
+            throw new SimError("No host for address " + address + ". Address "
+                    + "range of 0-" + (hosts.size() - 1) + " is valid");
+        }
+
+        DTNHost node = this.hosts.get(address);
+        assert node.getAddress() == address : "Node indexing failed. "
+                + "Node " + node + " in index " + address;
+
+        return node;
+    }
+
+    public ArrayList<DTNHost> getNodeByAddressFrom(ArrayList<Integer> address) {
+//		if (address < 0 || address >= hosts.size()) {
+//			throw new SimError("No host for address " + address + ". Address " +
+//					"range of 0-" + (hosts.size()-1) + " is valid");
+//		}
+
+        nodes.clear();
+        for (Integer dTNHost : address) {
+//            DTNHost node = this.hosts.get(dTNHost);
+//            System.out.println("HOST Integer : " + dTNHost);
+            nodes.add(this.hosts.get(dTNHost));
+
+        }
+
+//		assert node.getAddress() == address : "Node indexing failed. " + 
+//			"Node " + node + " in index " + address;
+        return nodes;
+    }
+
+    /**
+     * Schedules an update request to all nodes to happen at the specified
+     * simulation time.
+     *
+     * @param simTime The time of the update
+     */
+    public void scheduleUpdate(double simTime) {
+        scheduledUpdates.addUpdate(simTime);
+    }
 }

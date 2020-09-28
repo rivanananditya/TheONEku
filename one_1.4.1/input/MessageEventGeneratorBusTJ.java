@@ -8,6 +8,7 @@ import java.util.Random;
 
 import core.Settings;
 import core.SettingsError;
+import java.util.ArrayList;
 
 /**
  * Message creation -external events generator. Creates uniformly distributed
@@ -96,6 +97,11 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
      */
     protected Random rng;
     int iterator = 0;
+    private ArrayList<Integer> nodesCreateMsg = new ArrayList<>();
+    private ArrayList<String> idMsg = new ArrayList<>();
+    private ArrayList<Integer> lengthMsg = new ArrayList<>();
+    private int idMin = 1;
+    private int idMax = 38;
 
     /**
      * Constructor, initializes the interval between events, and the size of
@@ -192,7 +198,7 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
      *
      * @return message size
      */
-    protected int drawMessageSize() {
+    protected int drawMessageSize1() {
         int sizeDiff = sizeRange[0] == sizeRange[1] ? 0
                 : rng.nextInt(sizeRange[1] - sizeRange[0]);
         return sizeRange[0] + sizeDiff;
@@ -217,12 +223,12 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
      * @param from the "from" address
      * @return a destination address from the range, but different from "from"
      */
-    protected int drawToAddress(int hostRange[], int from) {
+    protected int drawToAddress(int hostRange[], ArrayList<Integer> from) {
         int to;
         do {
             to = this.toHostRange != null ? drawHostAddress(this.toHostRange)
                     : drawHostAddress(this.hostRange);
-        } while (from == to);
+        } while (from.contains(to));
 
         return to;
     }
@@ -235,21 +241,27 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
     public ExternalEvent nextEvent() {
         int responseSize = 0;
         /* zero stands for one way messages */
-        int msgSize;
+        ArrayList<Integer> msgSize;
         int interval;
-        int from;
+        ArrayList<Integer> from;
+        ArrayList<String> getIdMsg;
         int to;
 
         /* Get two *different* nodes randomly from the host ranges */
-        from = drawHostAddress(this.hostRange);
+        from = getHostCreatMessage(this.hostRange);
+//        System.out.println("FROM " + from);
 //                System.out.println("host RAnge "+this.hostRange.toString());
         to = drawToAddress(hostRange, from);
 
         msgSize = drawMessageSize();
         interval = drawNextEventTimeDiff();
+        getIdMsg = getID();
 
         /* Create event and advance to next event */
-        MessageCreateEvent mce = new MessageCreateEvent(from, to, this.getID(),
+//        idMsg.clear();
+//        System.out.println("ID PESAN " + getIdMsg);
+//        System.out.println("Length M "+msgSize);
+        MessageCreateEventBusTj mce = new MessageCreateEventBusTj(from, to, getIdMsg,
                 msgSize, responseSize, this.nextEventsTime);
         this.nextEventsTime += interval;
 
@@ -275,8 +287,41 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
      *
      * @return next globally unique message ID
      */
-    protected String getID() {
-        this.id++;
-        return idPrefix + this.id;
+    protected ArrayList<String> getID() {
+        idMsg.clear();
+//        System.out.println("diMIn " + idMin + " idMax " + idMax);
+        while (idMin <= idMax) {
+            this.id++;
+            idMsg.add(idPrefix + this.id);
+            idMin++;
+
+        }
+        idMax += 38;
+        return idMsg;
+    }
+
+    protected ArrayList<Integer> drawMessageSize() {
+        lengthMsg.clear();
+        int min = 1;
+        int max = 38;
+        while (min <= max) {
+            int sizeDiff = sizeRange[0] == sizeRange[1] ? 0
+                    : rng.nextInt(sizeRange[1] - sizeRange[0]);
+            lengthMsg.add(sizeRange[0] + sizeDiff);
+            min++;
+        }
+        return lengthMsg;
+    }
+
+    protected ArrayList<Integer> getHostCreatMessage(int hostRange[]) {
+        nodesCreateMsg.clear();
+        int i = 4;
+        iterator = 0;
+        while (i <= hostRange[1]) {
+//            System.out.println("HOST Range "+hostRange[1]);
+            nodesCreateMsg.add(i);
+            i++;
+        }
+        return nodesCreateMsg;
     }
 }

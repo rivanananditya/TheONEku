@@ -454,7 +454,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         //if message was created successfully add the according delay table entry
         if (stat) {
             updateDelayTableEntry(m, getHost(), estimateDelay(m, getHost(), true), SimClock.getTime());
-//            System.out.println("PESAN BARU "+m.getId()+" di buat oleh "+getHost()+" ukuran "+m.getSize()+" Tujuan "+m.getTo());
+            System.out.println("PESAN BARU "+m.getId()+" di buat oleh "+getHost()+" ukuran "+m.getSize()+" Tujuan "+m.getTo());
         }
 
         return stat;

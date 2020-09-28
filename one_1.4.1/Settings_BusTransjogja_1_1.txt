@@ -519,7 +519,7 @@ Events1.class = MessageEventGeneratorBusTJ
 
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events1.interval = 20,20
+Events1.interval = 300,300
 # Message sizes (500kB - 1MB)
 #Events1.size = 500k,1M
 Events1.size = 100k,500k
@@ -535,7 +535,7 @@ MovementModel.rngSeed = 2
 # World's size for Movement Models without implicit size (width, height; meters)
 MovementModel.worldSize = 24000, 15000
 # How long time to move hosts in the world before real simulation
-MovementModel.warmup = 200
+MovementModel.warmup = 1000
 
 ## Map based movement -movement model specific settings
 MapBasedMovement.nrofMapFiles = 1
