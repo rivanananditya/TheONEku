@@ -60,9 +60,9 @@ Group.movementModel = MapRouteMovementWithStop
 #EpidemicBusTjRouter
 #RapidBusTjRouter
 
-Group.router = RapidKnapsackBusTjRouter
-#Group.router = DecisionEngineBusTjRouter
-#DecisionEngineBusTjRouter.decisionEngine = EpidemicBusTjRouter
+#Group.router = RapidBusTjRouter
+Group.router = DecisionEngineBusTjRouter
+DecisionEngineBusTjRouter.decisionEngine = EpidemicBusTjRouter
 
 Group.bufferSize = 40M
 Group.waitTime = 0, 0
@@ -73,7 +73,7 @@ Group.interface2 = w802-11bInterface
 # Kecepata Bus Transjogja
 Group.speed = 2.7, 11.1
 # Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 300
+Group.msgTtl = 60
 Group.stopFile = data/CoordStopPoint.txt
 Group.stopTime = 5, 30
 #Group.stopTime = 60, 120
@@ -511,17 +511,11 @@ Group59.nrofHosts = 4
 Events.nrof = 1
 # Class of the first event generator
 Events1.class = MessageEventGeneratorBusTJ
-#Events1.class = ExternalEventsQueue
-#Events1.filePath = CreatedMsgLaluLintas1800.txt
-
-#Events2.class = ExternalEventsQueue
-#Events2.filePath = CreatedMessageLaluLintas.txt
 
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
 Events1.interval = 300,300
 # Message sizes (500kB - 1MB)
-#Events1.size = 500k,1M
 Events1.size = 100k,500k
 # range of message source/destination addresses
 Events1.hosts = 4,41
@@ -545,18 +539,12 @@ MapBasedMovement.mapFile1 = data/JalurTJ.wkt
 ## Reports - all report names have to be valid report classes
 
 # how many reports to load
-Report.nrofReports = 6
+Report.nrofReports = 7
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
-Report.reportDir = reports/BusTj/AutoCreateM20sPerSensor/
+Report.reportDir = reports/BusTjBaru/AutoCreateM300sPerSensorTTL60/
 # Report classes to load
-
-#Report.report1 = ReportBusPesanLalulintas
-#Report1.ToNodeID=L
-#Report.report1 = ReportBusPesanPolusi
-#Report1.ToNodeID=M
-#Report.report2 = MessageStatsReport
 
 Report.report1 = MessageStatsReport
 Report.report2 = LatencyPerContactReport
@@ -564,6 +552,7 @@ Report.report3 = MessageDeliveredPerContactReport
 Report.report4 = PercentageMessageDeliveredPerContactReport
 Report.report5 = OverheadPerContactReport
 Report.report6 = DropPerContactReport
+Report.report7 = BufferOccupancyPerContact
 
 ## Default settings for some routers settings
 ProphetRouter.secondsInTimeUnit = 30

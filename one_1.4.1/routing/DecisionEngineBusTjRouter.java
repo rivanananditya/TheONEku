@@ -382,15 +382,15 @@ public class DecisionEngineBusTjRouter extends ActiveRouter {
     protected void transferDone(Connection con) {
         Message transferred = this.getMessage(con.getMessage().getId());
 
-        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
-                i.hasNext();) {
-            Tuple<Message, Connection> t = i.next();
-            if (t.getKey().getId().equals(transferred.getId())
-                    && t.getValue().equals(con)) {
-                i.remove();
-                break;
-            }
-        }
+//        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
+//                i.hasNext();) {
+//            Tuple<Message, Connection> t = i.next();
+//            if (t.getKey().getId().equals(transferred.getId())
+//                    && t.getValue().equals(con)) {
+//                i.remove();
+//                break;
+//            }
+//        }
 
         if (decider.shouldDeleteSentMessage(transferred, con.getOtherNode(getHost()), getHost())) {
 //            if (transferred.getId().equals("M14")) {

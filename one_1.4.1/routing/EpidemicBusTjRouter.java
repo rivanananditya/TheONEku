@@ -71,9 +71,9 @@ public class EpidemicBusTjRouter implements RoutingDecisionEngineBusTj {
     @Override
     public boolean shouldDeleteSentMessage(Message m, DTNHost otherHost, DTNHost thisHost) {
         if (String.valueOf(thisHost.toString().charAt(0)).equals("s")) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
