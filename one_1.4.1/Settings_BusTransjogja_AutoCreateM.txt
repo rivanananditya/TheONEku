@@ -25,7 +25,7 @@ w802-11pInterface.type = SimpleBroadcastInterface
 #250kbps = 38kBps
 #2Mbps = 250kBps
 w802-11pInterface.transmitSpeed = 750k
-w802-11pInterface.transmitRange = 300
+w802-11pInterface.transmitRange = 100
 
 # interface for 802.11b link profile
 w802-11bInterface.type = SimpleBroadcastInterface
@@ -60,9 +60,9 @@ Group.movementModel = MapRouteMovementWithStop
 #EpidemicBusTjRouter
 #RapidBusTjRouter
 
-#Group.router = RapidBusTjRouter
-Group.router = DecisionEngineBusTjRouter
-DecisionEngineBusTjRouter.decisionEngine = EpidemicBusTjRouter
+Group.router = RapidKnapsackBusTjRouter
+#Group.router = DecisionEngineBusTjRouter
+#DecisionEngineBusTjRouter.decisionEngine = EpidemicBusTjRouter
 
 Group.bufferSize = 40M
 Group.waitTime = 0, 0
@@ -511,7 +511,6 @@ Group59.nrofHosts = 4
 Events.nrof = 1
 # Class of the first event generator
 Events1.class = MessageEventGeneratorBusTJ
-
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
 Events1.interval = 300,300
@@ -543,7 +542,7 @@ Report.nrofReports = 7
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
-Report.reportDir = reports/BusTjBaru/AutoCreateM300sPerSensorTTL60/
+Report.reportDir = reports/BusTjBaru/AutoCreateM300sPerSensorTTL60range100/
 # Report classes to load
 
 Report.report1 = MessageStatsReport

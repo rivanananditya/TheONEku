@@ -247,6 +247,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
      * Removes messages from the buffer (oldest first) until there's enough
      * space for the new message.
      *
+     * @param m
      * @param size Size of the new message transferred, the transfer is aborted
      * before message is removed
      * @return True if enough space could be freed, false if not

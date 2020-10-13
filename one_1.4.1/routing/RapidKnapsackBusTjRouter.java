@@ -454,7 +454,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         //if message was created successfully add the according delay table entry
         if (stat) {
             updateDelayTableEntry(m, getHost(), estimateDelay(m, getHost(), true), SimClock.getTime());
-            System.out.println("PESAN BARU "+m.getId()+" di buat oleh "+getHost()+" ukuran "+m.getSize()+" Tujuan "+m.getTo());
+//            System.out.println("PESAN BARU "+m.getId()+" di buat oleh "+getHost()+" ukuran "+m.getSize()+" Tujuan "+m.getTo());
         }
 
         return stat;
@@ -1011,13 +1011,16 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         int retriction = 0;
         jumlahMsg = this.tempMsgDrop.size();
         int bufferSize = getHost().getRouter().getBufferSize() / bytes;
+//        int bufferSize = getHost().getRouter().getBufferSize();
         retriction = bufferSize;
 
         double[][] bestSolutionDrop = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
             for (int length = this.lengthAwal / bytes; length <= retriction; length++) {
+//            for (int length = this.lengthAwal; length <= retriction; length++) {
                 if (i == 0 || length == this.lengthAwal / bytes) {
+//                if (i == 0 || length == this.lengthAwal) {
                     bestSolutionDrop[i][length] = 0;
                 } else if (this.lengthMsgDrop.get(i - 1) <= length) {
                     bestSolutionDrop[i][length] = Math.max(bestSolutionDrop[i - 1][length],
@@ -1067,15 +1070,24 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
 //            System.out.println("size " + size);
 //            System.out.println("freeBUffer " + freeBuffer);
 //            getUtilityMsgToArrForDrop(getHost(), getOtherHostt());
+            this.tempMsgDrop.clear();
+            this.utilityMsgDrop.clear();
+            this.lengthMsgDrop.clear();
+            this.tempMsgLowersUtil.clear();
             knapsackDrop(m, true);
 
-            if (this.tempMsgLowersUtil == null) {
-//                System.out.println("NULL");
+            if (this.tempMsgLowersUtil.contains(m)) {
+//                System.out.println("Reject m");
                 return false;
             }
             for (Message msg : this.tempMsgLowersUtil) {
 //                if (freeBuffer >= m.getSize()) {
 //                    return true;
+//                }
+//                if(msg.equals(m)){
+//                    System.out.println("remove m "+m.getId()+" di node "+getHost());
+//                    this.tempMsgLowersUtil.remove(m);
+//                    return false;
 //                }
                 if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
 //            else {
@@ -1083,11 +1095,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
                     deleteMessage(msg.getId(), true);
 //                    freeBuffer += msg.getSize();
                 }
-            }
-            this.tempMsgDrop.clear();
-            this.utilityMsgDrop.clear();
-            this.lengthMsgDrop.clear();
-            this.tempMsgLowersUtil.clear();
+            }            
         }
         return true;
     }
