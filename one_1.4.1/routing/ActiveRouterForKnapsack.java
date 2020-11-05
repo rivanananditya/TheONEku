@@ -273,27 +273,7 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
 
         return true;
     }
-    protected boolean makeRoomForMessage(int size) {
-        if (size > this.getBufferSize()) {
-            return false; // message too big for the buffer
-        }
-
-        int freeBuffer = this.getFreeBufferSize();
-        /* delete messages from the buffer until there's enough space */
-        while (freeBuffer < size) {
-            Message m = getOldestMessage(true); // don't remove msgs being sent
-
-            if (m == null) {
-                return false; // couldn't remove any more messages
-            }
-
-            /* delete message from the buffer as "drop" */
-            deleteMessage(m.getId(), true);
-            freeBuffer += m.getSize();
-        }
-
-        return true;
-    }
+    
 
     /**
      * Drops messages whose TTL is less than zero.
@@ -375,6 +355,28 @@ public abstract class ActiveRouterForKnapsack extends MessageRouter {
         }
 
         return forTuples;
+    }
+    
+    protected boolean makeRoomForMessage(int size) {
+        if (size > this.getBufferSize()) {
+            return false; // message too big for the buffer
+        }
+
+        int freeBuffer = this.getFreeBufferSize();
+        /* delete messages from the buffer until there's enough space */
+        while (freeBuffer < size) {
+            Message m = getOldestMessage(true); // don't remove msgs being sent
+
+            if (m == null) {
+                return false; // couldn't remove any more messages
+            }
+
+            /* delete message from the buffer as "drop" */
+            deleteMessage(m.getId(), true);
+            freeBuffer += m.getSize();
+        }
+
+        return true;
     }
 
     /**

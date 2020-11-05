@@ -172,17 +172,17 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
      */
     protected int drawHostAddress1(int hostRange[]) {
         if (hostRange[1] == hostRange[0]) {
-            System.out.println("Host Range 0 " + hostRange[0]);
+//            System.out.println("Host Range 0 " + hostRange[0]);
             return hostRange[0];
         }
-        System.out.println("Host range " + hostRange[1]);
+//        System.out.println("Host range " + hostRange[1]);
         return hostRange[0] + rng.nextInt(hostRange[1] - hostRange[0]);
     }
 
     protected int drawHostAddress(int hostRange[]) {
 //        System.out.println("iterator "+iterator);
-        int i = 4;
-        if (iterator == 38) {
+        int i = 4; //nomor node awal sensor
+        if (iterator == 38) { //38 jumlah sensor
             iterator = 0;
         }
         if ((i + iterator) <= hostRange[1]) {
@@ -249,8 +249,6 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
 
         /* Get two *different* nodes randomly from the host ranges */
         from = getHostCreatMessage(this.hostRange);
-//        System.out.println("FROM " + from);
-//                System.out.println("host RAnge "+this.hostRange.toString());
         to = drawToAddress(hostRange, from);
 
         msgSize = drawMessageSize();
@@ -258,9 +256,6 @@ public class MessageEventGeneratorBusTJ implements EventQueue {
         getIdMsg = getID();
 
         /* Create event and advance to next event */
-//        idMsg.clear();
-//        System.out.println("ID PESAN " + getIdMsg);
-//        System.out.println("Length M "+msgSize);
         MessageCreateEventBusTj mce = new MessageCreateEventBusTj(from, to, getIdMsg,
                 msgSize, responseSize, this.nextEventsTime);
         this.nextEventsTime += interval;

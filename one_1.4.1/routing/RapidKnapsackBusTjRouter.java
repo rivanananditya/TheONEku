@@ -56,9 +56,6 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
     LinkedList<Message> tempMsgTerpilih;
     LinkedList<Message> tempMsgLowersUtil;
     private DTNHost getOtherHost;
-    //1000
-    //500000
-    private static final int lengthAwal = 100000;
     private static final int bytes = 1000;
 
     /**
@@ -122,10 +119,8 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         if (con.isUp()) {
 
             DTNHost otherHost = con.getOtherNode(getHost());
-            RapidKnapsackBusTjRouter otherRouter = (RapidKnapsackBusTjRouter) otherHost.getRouter();
             this.getOtherHost = null;
             this.getOtherHost = otherHost;
-//            System.out.println(getHost() + " con " + otherHost);
             this.startTimestamps.put(otherHost, SimClock.getTime());
             /* new connection */
             //simulate control channel on connection up without sending any data
@@ -144,12 +139,9 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             this.delayTable.dummyUpdateConnection(con);
 
             if (!String.valueOf(getHost().toString().charAt(0)).equals("s")) {
-                cekSyaratKnapsackSend(getHost(), otherHost, otherRouter);
+                cekSyaratKnapsackSend(getHost(), otherHost);
             }
-//            if (String.valueOf(getHost().toString().charAt(0)).equals("s")) {
-//            if (String.valueOf(getHost().toString().charAt(0)).equals("s") && String.valueOf(getHost().toString().charAt(1)).equals("3") && String.valueOf(getHost().toString().charAt(2)).equals("1")) {
-//                System.out.println("Buffer Con UP " + getHost() + " = " + (getHost().getRouter().getBufferSize() - getHost().getRouter().getFreeBufferSize()));
-//            }
+
         } else {
             /* connection went down */
             //update connection
@@ -180,22 +172,14 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             if (etime - times > 0) {
                 history.add(new Duration(times, etime));
             }
-//            getUtilityMsgToArrForDrop(getHost(), otherHost);
+            
             this.connHistory.put(otherHost, history);
             this.startTimestamps.remove(otherHost);
 
             this.lengthMsg.clear();
-//            this.lengthMsgDrop.clear();
             this.utilityMsg.clear();
-//            this.utilityMsgDrop.clear();
             this.tempMsg.clear();
-//            this.tempMsgDrop.clear();
             this.tempMsgTerpilih.clear();
-//            this.tempMsgLowersUtil.clear();
-//            this.getOtherHost = null;
-//            if (String.valueOf(getHost().toString().charAt(0)).equals("s") && String.valueOf(getHost().toString().charAt(1)).equals("3") && String.valueOf(getHost().toString().charAt(2)).equals("1")) {
-//                System.out.println("Buffer Con DOWN " + getHost() + " = " + (getHost().getRouter().getBufferSize() - getHost().getRouter().getFreeBufferSize()));
-//            }
         }
     }
 
@@ -732,21 +716,14 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
     @Override
     protected void transferDone(Connection con) {
         Message transferred = this.getMessage(con.getMessage().getId());
-
         if (String.valueOf(getHost().toString().charAt(0)).equals("s")) {
-            //if(transferred.getId().equals("M7"))
-            //System.out.println("Host: " + getHost() + " deleting M7 after transfer");
-//            System.out.println("TF Done " + transferred.getId());
             this.deleteMessage(transferred.getId(), false);
-
         }
     }
 
     private Tuple<Tuple<Message, Connection>, Double> tryOtherMessages() {
         List<Tuple<Tuple<Message, Connection>, Double>> messages = new ArrayList<Tuple<Tuple<Message, Connection>, Double>>();
-//        Collection<Message> msgCollection = getMessageCollection();
 
-        //List<Message> m = msgCollection.stream().collect(Collectors.toList());
         for (Connection con : getConnections()) {
             DTNHost other = con.getOtherNode(getHost());
             RapidKnapsackBusTjRouter otherRouter = (RapidKnapsackBusTjRouter) other.getRouter();
@@ -754,27 +731,21 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             if (otherRouter.isTransferring()) {
                 continue; // skip hosts that are transferring
             }
-            
+
             if (String.valueOf(other.toString().charAt(0)).equals("s")) {
                 continue;
             }
 
             if (String.valueOf(getHost().toString().charAt(0)).equals("s")) {
-//                System.out.println("ktemu sensor");
-//                continue;
-//                System.out.println("sensor " + getHost().getMessageCollection());
                 for (Message m : getHost().getMessageCollection()) {
-//                    System.out.println("pesan di sensorrr " + m.getId());
                     double u = getMarginalUtility(m, other, getHost());
                     Tuple<Message, Connection> t1 = new Tuple<Message, Connection>(m, con);
                     Tuple<Tuple<Message, Connection>, Double> t2 = new Tuple<Tuple<Message, Connection>, Double>(t1, u);
                     messages.add(t2);
-//                    deleteMessage(m.getId(), false);
                 }
             } else {
 
                 double mu = 0.0;
-//                System.out.println("pesan bus "+this.tempMsgTerpilih);
                 for (Message m : this.tempMsgTerpilih) {
                     if (otherRouter.hasMessage(m.getId())) {
                         continue; // skip messages that the other one already has
@@ -790,16 +761,13 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
                     messages.add(t2);
                 }
             }
-//            this.tempMsgTerpilih.clear();
         }
         this.delayTable.setChanged(false);
         if (messages == null) {
             return null;
         }
 
-//        Collections.sort(messages, new TupleComparator2());
         return tryTupleMessagesForConnected(messages);	// try to send messages
-//        return tryMessagesForConnected(messages);	// try to send messages
     }
 
     /**
@@ -824,7 +792,6 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
                 return t;
             }
         }
-
         return null;
     }
 
@@ -837,31 +804,6 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         return new RapidKnapsackBusTjRouter(this);
     }
 
-    /**
-     * Comparator for Message-Connection-Double-Tuples that orders the tuples by
-     * their double value
-     */
-    private class TupleComparator2 implements Comparator<Tuple<Tuple<Message, Connection>, Double>> {
-
-        @Override
-        public int compare(Tuple<Tuple<Message, Connection>, Double> tuple1, Tuple<Tuple<Message, Connection>, Double> tuple2) {
-            // tuple1...
-            double mu1 = tuple1.getValue();
-            // tuple2...
-            double mu2 = tuple2.getValue();
-
-            // bigger value should come first
-            if (mu2 - mu1 == 0) {
-                /* equal values -> let queue mode decide */
-                return compareByQueueMode((tuple1.getKey()).getKey(), (tuple2.getKey()).getKey());
-            } else if (mu2 - mu1 < 0) {
-                return -1;
-            } else {
-                return 1;
-            }
-        }
-    }
-
     private enum UtilityAlgorithm {
         AVERAGE_DELAY,
         MISSED_DEADLINES,
@@ -870,6 +812,10 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
 
     public Map<Integer, DTNHost> getHostMapping() {
         return this.hostMapping;
+    }
+    
+    public DTNHost getOtherHostt() {
+        return this.getOtherHost;
     }
 
     public double getMeetingProb(DTNHost host) {
@@ -888,10 +834,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         while (duration.hasNext()) {
             Duration d = duration.next();
             hasil += (d.end - d.start);
-//            System.out.println("d "+d.end +" d star "+d.start);
         }
-//        System.out.println("list duration "+list);
-//        System.out.println("hasil "+hasil+" dan size "+list.size());
         int avgDuration = (int) (hasil / list.size());
         if (avgDuration == 0) {
             avgDuration = 1;
@@ -908,11 +851,10 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         }
     }
 
-    public void cekSyaratKnapsackSend(DTNHost thisHost, DTNHost otherHost, RapidKnapsackBusTjRouter otherRouter) {
+    public void cekSyaratKnapsackSend(DTNHost thisHost, DTNHost otherHost) {
         if (getSyaratKnapsack(thisHost, otherHost)) {
-//            System.out.println("test");
             getUtilityMsgToArrForSend(thisHost, otherHost);
-            knapsackSend(thisHost, otherHost, otherRouter);
+            knapsackSend(thisHost, otherHost);
         } else {
             this.tempMsgTerpilih.addAll(getMessageCollection());
         }
@@ -928,10 +870,8 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         int retriction;
         int avgDuration = (int) getAvgDurations(otherHost);
 
-        int tfSpeed = getTransferSpeed(thisHost) / bytes; //in bytes
-//        int tfSpeed1 = (int) this.delayTable.getAvgTransferOpportunity();
+        int tfSpeed = getTransferSpeed(thisHost) / bytes; //in kiloBytes
         retriction = Math.abs(avgDuration * tfSpeed);
-
         return retriction;
     }
 
@@ -940,39 +880,30 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
     }
 
     public void getUtilityMsgToArrForSend(DTNHost thisHost, DTNHost otherHost) {
-//        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : thisHost.getMessageCollection()) {
-//            double tempL = m.getSize()/bytes;
-//            this.lengthMsg.add(tempL); //in byte
-            this.lengthMsg.add(m.getSize() / bytes); //in byte
+            this.lengthMsg.add(m.getSize() / bytes); //in kiloBytes
             this.utilityMsg.add(getMarginalUtility(m, otherHost, thisHost));
         }
-//        System.out.println(utilityMsg);
-//        System.out.println(lengthMsg);
     }
 
     public void getUtilityMsgToArrForDrop(LinkedList<Message> msg, DTNHost thisHost, DTNHost otherHost) {
-//        Collection<Message> msgCollection = thisHost.getMessageCollection();
         for (Message m : msg) {
-            this.lengthMsgDrop.add(m.getSize() / bytes);
+            this.lengthMsgDrop.add(m.getSize() / bytes); //in kiloBytes
             this.utilityMsgDrop.add(getMarginalUtility(m, otherHost, thisHost));
         }
-//        System.out.println(utilityMsgDrop);
-//        System.out.println(lengthMsg);
     }
 
-    public void knapsackSend(DTNHost thisHost, DTNHost otherHost, RapidKnapsackBusTjRouter otherRouter) {
+    public void knapsackSend(DTNHost thisHost, DTNHost otherHost) {
         this.tempMsg.addAll(this.getMessageCollection());
         int jumlahMsg = 0;
         int retriction = 0;
         jumlahMsg = this.tempMsg.size();
         retriction = this.getRetrictionForSend(thisHost, otherHost);
-
         double[][] bestSolutionSend = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = this.lengthAwal / bytes; length <= retriction; length++) {
-                if (i == 0 || length == this.lengthAwal / bytes) {
+            for (int length = 0; length <= retriction; length++) {
+                if (i == 0 || length == 0) {
                     bestSolutionSend[i][length] = 0;
                 } else if (this.lengthMsg.get(i - 1) <= length) {
                     bestSolutionSend[i][length] = Math.max(bestSolutionSend[i - 1][length],
@@ -984,43 +915,27 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         }
         int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
-//            if (otherRouter.hasMessage(this.tempMsg.get(j - 1).getId())) {
-////                    System.out.println("pesan sudah di peer");
-//                continue; // skip messages that the other one already has
-//            }
             if (bestSolutionSend[j][temp] > bestSolutionSend[j - 1][temp]) {
                 this.tempMsgTerpilih.add(this.tempMsg.get(j - 1));
                 temp = temp - this.lengthMsg.get(j - 1);
             }
-            if (temp == 0) {
-                break;
-            }
         }
-//        bestSolutionSend=null;
-//        System.out.println("pesan terpilih" + tempMsgTerpilih);
-//        this.tempMsg.clear();
-//        this.utilityMsg.clear();
-//        this.lengthMsg.clear();
     }
 
-    public void knapsackDrop(Message m, boolean excludeMsgBeingSent) {
+    public void knapsackDrop(Message m) {
         this.tempMsgDrop.addAll(this.getMessageCollection());
         this.tempMsgDrop.add(m);
         getUtilityMsgToArrForDrop(tempMsgDrop, getHost(), getOtherHostt());
         int jumlahMsg = 0;
         int retriction = 0;
         jumlahMsg = this.tempMsgDrop.size();
-        int bufferSize = getHost().getRouter().getBufferSize() / bytes;
-//        int bufferSize = getHost().getRouter().getBufferSize();
+        int bufferSize = getHost().getRouter().getBufferSize() / bytes; //in kiloBytes
         retriction = bufferSize;
-
         double[][] bestSolutionDrop = new double[jumlahMsg + 1][retriction + 1];
 
         for (int i = 0; i <= jumlahMsg; i++) {
-            for (int length = this.lengthAwal / bytes; length <= retriction; length++) {
-//            for (int length = this.lengthAwal; length <= retriction; length++) {
-                if (i == 0 || length == this.lengthAwal / bytes) {
-//                if (i == 0 || length == this.lengthAwal) {
+            for (int length = 0; length <= retriction; length++) {
+                if (i == 0 || length == 0) {
                     bestSolutionDrop[i][length] = 0;
                 } else if (this.lengthMsgDrop.get(i - 1) <= length) {
                     bestSolutionDrop[i][length] = Math.max(bestSolutionDrop[i - 1][length],
@@ -1032,28 +947,12 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         }
         int temp = retriction;
         for (int j = jumlahMsg; j >= 1; j--) {
-//            if (temp == 0) {
-//                break;
-//            }
-//            if (excludeMsgBeingSent && isSending(this.tempMsgDrop.get(j - 1).getId())) {
-//                continue; // skip the message(s) that router is sending
-//            }
             if (bestSolutionDrop[j][temp] > bestSolutionDrop[j - 1][temp]) {
-//                if (this.hasMessage(tempMsgDrop.get(j - 1).getId()) && !isSending(tempMsgDrop.get(j - 1).getId())) {
-//                this.tempMsgLowersUtil.add(this.tempMsgDrop.get(j - 1));
-//                    deleteMessage(tempMsgDrop.get(j - 1).getId(), true);
                 temp = temp - this.lengthMsgDrop.get(j - 1);
-//                }
             } else {
                 this.tempMsgLowersUtil.add(this.tempMsgDrop.get(j - 1));
             }
-
         }
-//        System.out.println("pesan di buffer" + tempMsgDrop);
-//        System.out.println(utilityMsgDrop);
-//        System.out.println(lengthMsgDrop);
-//        System.out.println("Pesan Baru " + m.getId());
-//        System.out.println(this.tempMsgLowersUtil);
     }
 
     @Override
@@ -1063,44 +962,23 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         }
 
         int freeBuffer = this.getFreeBufferSize();
-//        int tempSize = 0;
 
-        /* delete messages from the buffer until there's enough space */
         if (freeBuffer < m.getSize()) {
-//            System.out.println("size " + size);
-//            System.out.println("freeBUffer " + freeBuffer);
-//            getUtilityMsgToArrForDrop(getHost(), getOtherHostt());
             this.tempMsgDrop.clear();
             this.utilityMsgDrop.clear();
             this.lengthMsgDrop.clear();
             this.tempMsgLowersUtil.clear();
-            knapsackDrop(m, true);
+            knapsackDrop(m);
 
-            if (this.tempMsgLowersUtil.contains(m)) {
-//                System.out.println("Reject m");
-                return false;
-            }
             for (Message msg : this.tempMsgLowersUtil) {
-//                if (freeBuffer >= m.getSize()) {
-//                    return true;
-//                }
-//                if(msg.equals(m)){
-//                    System.out.println("remove m "+m.getId()+" di node "+getHost());
-//                    this.tempMsgLowersUtil.remove(m);
-//                    return false;
-//                }
-                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
-//            else {
-//                    System.out.println("hapus pesan "  + msg.getId());
-                    deleteMessage(msg.getId(), true);
-//                    freeBuffer += msg.getSize();
+                if (msg.equals(m)) {
+                    return false;
                 }
-            }            
+                if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
+                    deleteMessage(msg.getId(), true);
+                }
+            }
         }
         return true;
-    }
-
-    public DTNHost getOtherHostt() {
-        return this.getOtherHost;
-    }
+    } 
 }
