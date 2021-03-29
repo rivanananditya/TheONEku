@@ -25,6 +25,7 @@ import routing.rapid.MeetingEntry;
 import core.*;
 import java.util.Iterator;
 import java.util.LinkedList;
+import movement.Path;
 import routing.community.Duration;
 
 /**
@@ -114,6 +115,47 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         getOtherHost = r.getOtherHost;
     }
 
+    public void LRT() {
+        //koordinat
+        double x1 = getHost().getLocation().getX();
+        double x2 = getOtherHost.getLocation().getX();
+        double y1 = getHost().getLocation().getY();
+        double y2 = getOtherHost.getLocation().getY();
+        double x0 = x2 - x1; //delta x0
+        double y0 = y2 - y1; //delta y0
+
+        //velocity vector
+        double vxm = getHost().getPath().getSpeed() * Math.cos(getSudut());
+        double vym = getHost().getPath().getSpeed() * Math.sin(getSudut());
+        double vxn = getOtherHost.getPath().getSpeed() * Math.cos(getSudut());
+        double vyn = getOtherHost.getPath().getSpeed() * Math.sin(getSudut());
+        double vx = vxm - vxn; //delta vx
+        double vy = vym - vyn; //delta vy
+
+        double n = (x0 * vx) - (y0 * vy);
+
+        double R = 2; // getRadioRange
+
+        double LRTm = (1 / Math.pow(vx, 2) + Math.pow(vy, 2));
+        double LRTn = -n * Math.abs(Math.sqrt(Math.pow(R, 2) * (Math.pow(vx, 2) + Math.pow(vy, 2)) - n)); //isi rumuasnya
+        //  double LRTn = Math.abs(Math.sqrt(Math.pow(R,2)(Math.pow(vx,2)+ Math.pow(vy,2)- (vx)) ));
+        double HitungLRT = LRTm * LRTn; //total
+
+    }
+
+    private int getSudut() {
+        double x1 = getHost().getLocation().getX();
+        double y1 = getHost().getLocation().getY();
+        double x2 = getOtherHost.getLocation().getX();
+        double y2 = getOtherHost.getLocation().getY();
+
+        double panjang = x2 - x1;
+        double lebar = y2 - y1;
+        double miring = Math.sqrt(Math.pow(panjang, 2) + Math.pow(lebar, 2));
+
+        return 0;
+    }
+
     @Override
     public void changedConnection(Connection con) {
         if (con.isUp()) {
@@ -122,6 +164,19 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             this.getOtherHost = null;
             this.getOtherHost = otherHost;
             this.startTimestamps.put(otherHost, SimClock.getTime());
+//            /* Link Residual Time */
+//            //prediction of remaining link time
+//            double x1 = getHost().getLocation().getX();
+//            double y1 = getHost().getLocation().getY();
+//            double x2 = this.getOtherHost.getLocation().getX();
+//            double y2 = this.getOtherHost.getLocation().getY();
+//            double vx = con.getSpeed()*Math.cos(0); //velocity vector X
+//            double vy = con.getSpeed()*Math.sin(0); // velocity vector Y
+//            double linkResidualTime;
+//            
+//            
+//            linkResidualTime = (1/Math.pow(vx,2) +Math.pow(vy,2)); //blom kelar
+
             /* new connection */
             //simulate control channel on connection up without sending any data
             this.timestamp = SimClock.getTime();
@@ -172,7 +227,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             if (etime - times > 0) {
                 history.add(new Duration(times, etime));
             }
-            
+
             this.connHistory.put(otherHost, history);
             this.startTimestamps.remove(otherHost);
 
@@ -183,7 +238,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
         }
     }
 
-    public void ckeckConnectionStatus() {
+    public void checkConnectionStatus() {
 
         DTNHost host = getHost();
         int from = host.getAddress();
@@ -802,6 +857,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
     @Override
     public RapidKnapsackBusTjRouter replicate() {
         return new RapidKnapsackBusTjRouter(this);
+
     }
 
     private enum UtilityAlgorithm {
@@ -813,7 +869,7 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
     public Map<Integer, DTNHost> getHostMapping() {
         return this.hostMapping;
     }
-    
+
     public DTNHost getOtherHostt() {
         return this.getOtherHost;
     }
@@ -971,14 +1027,14 @@ public class RapidKnapsackBusTjRouter extends ActiveRouterForKnapsack {
             knapsackDrop(m);
 
             for (Message msg : this.tempMsgLowersUtil) {
-                if (msg.equals(m)) {
-                    return false;
-                }
+//                if (msg.equals(m)) {
+//                    return false;
+//                }
                 if (this.hasMessage(msg.getId()) && !isSending(msg.getId())) {
                     deleteMessage(msg.getId(), true);
                 }
             }
         }
         return true;
-    } 
+    }
 }
